@@ -1,5 +1,4 @@
 const multer = require('multer');
-const pdfParse = require('pdf-parse');
 
 const storage = multer.memoryStorage();
 
@@ -15,6 +14,7 @@ const uploadResume = async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ message: 'No file uploaded' });
 
+    const pdfParse = require('pdf-parse');
     const data = await pdfParse(req.file.buffer);
 
     res.status(200).json({
