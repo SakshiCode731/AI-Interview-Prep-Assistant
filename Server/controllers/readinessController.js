@@ -1,4 +1,6 @@
-const Anthropic = require('@anthropic-ai/sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 const getReadinessScore = async (req, res) => {
   try {
@@ -8,33 +10,25 @@ const getReadinessScore = async (req, res) => {
       return res.status(400).json({ message: 'resumeText and jobRole are required' });
     }
 
-    const client = new Anthropic({
-      apiKey: process.env.ANTHROPIC_API_KEY
-    });
+    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
 
-    const message = await client.messages.create({
-      model: 'claude-3-haiku-20240307',
-      max_tokens: 1024,
-      messages: [
-        {
-          role: 'user',
-          content: `You are an expert career coach. Analyze this resume and give a readiness score out of 100 for the role of ${jobRole}.
+    const prompt = `You are an expert career coach. Analyze this resume and give a readiness score out of 100 for the role of ${jobRole}.
           
 Resume:
 ${resumeText}
 
-Respond in JSON format:
+Respond in JSON format only, no extra text:
 {
   "score": <number>,
   "strengths": [<list of strengths>],
   "improvements": [<list of improvements>],
   "summary": "<brief summary>"
-}`
-        }
-      ]
-    });
+}`;
 
-    const response = JSON.parse(message.content[0].text);
+    const result = await model.generateContent(prompt);
+    const text = result.response.text();
+    const clean = text.replace(/```json|```/g, '').trim();
+    const response = JSON.parse(clean);
 
     res.status(200).json({
       message: 'Readiness score generated',
