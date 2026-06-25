@@ -1,6 +1,4 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const Groq = require('groq-sdk');
 
 const getReadinessScore = async (req, res) => {
   try {
@@ -10,9 +8,16 @@ const getReadinessScore = async (req, res) => {
       return res.status(400).json({ message: 'resumeText and jobRole are required' });
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const client = new Groq({
+      apiKey: process.env.GROQ_API_KEY
+    });
 
-    const prompt = `You are an expert career coach. Analyze this resume and give a readiness score out of 100 for the role of ${jobRole}.
+    const completion = await client.chat.completions.create({
+     model: 'llama-3.3-70b-versatile',
+      messages: [
+        {
+          role: 'user',
+          content: `You are an expert career coach. Analyze this resume and give a readiness score out of 100 for the role of ${jobRole}.
           
 Resume:
 ${resumeText}
@@ -23,10 +28,12 @@ Respond in JSON format only, no extra text:
   "strengths": [<list of strengths>],
   "improvements": [<list of improvements>],
   "summary": "<brief summary>"
-}`;
+}`
+        }
+      ]
+    });
 
-    const result = await model.generateContent(prompt);
-    const text = result.response.text();
+    const text = completion.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
     const response = JSON.parse(clean);
 

@@ -1,13 +1,15 @@
-const express = require('express');
 const dotenv = require('dotenv');
+dotenv.config();
+const express = require('express');
 const cors = require('cors');
 const connectDB = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
 const companyRoutes = require('./routes/companyRoutes');
 const resumeRoutes = require('./routes/resumeRoutes');
 const readinessRoutes = require('./routes/readinessRoutes');
+const mockInterviewRoutes = require('./routes/mockInterviewRoutes');
 
-dotenv.config();
+
 connectDB();
 
 const app = express();
@@ -19,6 +21,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/companies', companyRoutes);
 app.use('/api/resume', resumeRoutes);
 app.use('/api/readiness', readinessRoutes);
+app.use('/api/mock-interview', mockInterviewRoutes);
 
 
 app.get('/', (req, res) => {
