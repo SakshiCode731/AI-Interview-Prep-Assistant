@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import ResumeUpload from './pages/ResumeUpload';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -22,7 +23,14 @@ const App = () => {
           </ProtectedRoute>
         }
       />
+      <Route path="/resume" element={
+        <ProtectedRoute>
+          <ResumeUpload />
+        </ProtectedRoute>
+      } />
     </Routes>
+
+
   );
 };
 
