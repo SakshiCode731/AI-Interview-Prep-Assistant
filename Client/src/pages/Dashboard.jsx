@@ -11,6 +11,8 @@ const Dashboard = () => {
   };
 
   const features = [
+    { title: '🤖 AI Chatbot', desc: 'Chat with AI mentor anytime', path: '/chatbot' },
+    { title: '🏢 Company Prep', desc: 'Search companies, see rounds and questions', path: '/companies' },
     { title: '📄 Resume Upload', desc: 'Upload your resume and extract text', path: '/resume' },
     { title: '🎯 Readiness Score', desc: 'Get AI powered readiness score', path: '/readiness' },
     { title: '❓ Mock Interview', desc: 'Practice with AI generated questions', path: '/mock-interview' },
