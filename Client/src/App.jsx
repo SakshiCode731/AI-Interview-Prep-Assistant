@@ -10,6 +10,9 @@ import MockInterview from './pages/MockInterview';
 import AnswerEvaluator from './pages/AnswerEvaluator';
 import CompanyPrep from './pages/CompanyPrep';
 import Chatbot from './pages/Chatbot';
+import DressingGuide from './pages/DressingGuide';
+import ConfidenceGuide from './pages/ConfidenceGuide';
+import BehaviorGuide from './pages/Behavior';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -42,6 +45,15 @@ const App = () => {
       } />
       <Route path="/chatbot" element={
         <ProtectedRoute><Chatbot /></ProtectedRoute>
+      } />
+      <Route path="/dressing-guide" element={
+        <ProtectedRoute><DressingGuide /></ProtectedRoute>
+      } />
+      <Route path="/confidence-guide" element={
+        <ProtectedRoute><ConfidenceGuide /></ProtectedRoute>
+      } />
+      <Route path="/behavior-guide" element={
+        <ProtectedRoute><BehaviorGuide /></ProtectedRoute>
       } />
     </Routes>
   );

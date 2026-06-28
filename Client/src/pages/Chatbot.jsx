@@ -18,6 +18,14 @@ const Chatbot = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
+ const formatMessage = (text) => {
+  return text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/^\* /gm, '• ')
+    .replace(/^\s{2}\* /gm, '  · ')
+    .replace(/\*(?!\*)/g, '');  // remaining single * remove karo
+};
+
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
 
@@ -75,7 +83,7 @@ const Chatbot = () => {
           <p className="text-gray-400 text-sm">Ask anything about interviews, companies, resume, or study plans</p>
         </div>
 
-        {/* Suggested Questions — only show at start */}
+        {/* Suggested Questions */}
         {messages.length === 1 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
             {suggestedQuestions.map((q, i) => (
@@ -100,13 +108,17 @@ const Chatbot = () => {
                 </div>
               )}
               <div
-                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
                   msg.role === 'user'
                     ? 'bg-purple-600 text-white rounded-br-sm'
                     : 'bg-gray-800 text-gray-200 rounded-bl-sm'
                 }`}
               >
-                {msg.content}
+                {msg.role === 'assistant' ? (
+                  <span dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} />
+                ) : (
+                  msg.content
+                )}
               </div>
               {msg.role === 'user' && (
                 <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center text-sm ml-3 flex-shrink-0 mt-1">

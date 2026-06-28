@@ -59,11 +59,14 @@ const Login = () => {
           </button>
         </form>
 
-        <p className="text-gray-400 text-center mt-4">
+        <p className="text-gray-400 text-sm text-center mt-4">
           Don't have an account?{' '}
-          <Link to="/register" className="text-purple-400 hover:underline">Register</Link>
-          <Link to="/register">Register</Link>
-          <Link to="/login">Login</Link>
+          <span
+            onClick={() => navigate('/register')}
+            className="text-purple-400 cursor-pointer hover:underline"
+          >
+            Register
+          </span>
         </p>
       </div>
     </div>
