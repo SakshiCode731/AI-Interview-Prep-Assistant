@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { useBookmarks } from '../context/BookmarkContext';
 
 const Dashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
+  const { toggleBookmark, isBookmarked } = useBookmarks();
   const [dressingTab, setDressingTab] = useState('male');
   const [showProfile, setShowProfile] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
@@ -81,160 +83,160 @@ const Dashboard = () => {
     { section: 'PREPARATION', items: [{ label: 'Company prep', icon: '🏢', path: '/companies' }, { label: 'Resume upload', icon: '📄', path: '/resume' }, { label: 'Readiness score', icon: '🎯', path: '/readiness' }, { label: 'Skill gap analysis', icon: '📊' }] },
     { section: 'PRACTICE', items: [{ label: 'Mock interview', icon: '❓', path: '/mock-interview', badge: 5 }, { label: 'Answer evaluator', icon: '✅', path: '/answer-evaluator' }, { label: 'AI chatbot', icon: '🤖', path: '/chatbot' }] },
     { section: 'GUIDES', items: [{ label: 'Dressing guide', icon: '👔', path: '/dressing-guide' }, { label: 'Confidence guide', icon: '🧘', path: '/confidence-guide' }, { label: 'Behavior guide', icon: '🤝', path: '/behavior-guide' }] },
-    { section: 'ACCOUNT', items: [{ label: 'Bookmarks', icon: '🔖' }, { label: 'Settings', icon: '⚙️' }] },
+    { section: 'ACCOUNT', items: [{ label: 'Bookmarks', icon: '🔖', path: '/bookmarks' }, { label: 'Settings', icon: '⚙️' }] },
   ];
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
       {/* Top Navbar */}
-     <nav className="bg-gray-950 border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
+      <nav className="bg-gray-950 border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
 
-  {/* Left: Logo + Nav Pills */}
-  <div className="flex items-center gap-6">
+        {/* Left: Logo + Nav Pills */}
+        <div className="flex items-center gap-6">
 
-    {/* Logo */}
-    <div className="flex items-center gap-2">
-      <span className="text-blue-400 text-xl">⬡</span>
-      <span className="text-white font-bold text-lg">PrepAI</span>
-    </div>
+          {/* Logo */}
+          <div className="flex items-center gap-2">
+            <span className="text-blue-400 text-xl">⬡</span>
+            <span className="text-white font-bold text-lg">PrepAI</span>
+          </div>
 
-    {/* Nav Pills */}
-    <div className="hidden md:flex gap-2">
-      {['Dashboard', 'Companies', 'Practice', 'Guides', 'Progress'].map((item, i) => (
-        <button
-          key={i}
-          onClick={() => {
-            setActiveNav(item);
-            if (item === 'Companies') navigate('/companies');
-            if (item === 'Practice') navigate('/mock-interview');
-            if (item === 'Dashboard') navigate('/dashboard');
-          }}
-          className="px-5 py-2 rounded-full text-sm font-medium border border-gray-700 bg-gray-900 text-gray-200 hover:border-gray-500 hover:text-white transition"
-        >
-          {item}
-        </button>
-      ))}
-    </div>
+          {/* Nav Pills */}
+          <div className="hidden md:flex gap-2">
+            {['Dashboard', 'Companies', 'Practice', 'Guides', 'Progress'].map((item, i) => (
+              <button
+                key={i}
+                onClick={() => {
+                  setActiveNav(item);
+                  if (item === 'Companies') navigate('/companies');
+                  if (item === 'Practice') navigate('/mock-interview');
+                  if (item === 'Dashboard') navigate('/dashboard');
+                }}
+                className="px-5 py-2 rounded-full text-sm font-medium border border-gray-700 bg-gray-900 text-gray-200 hover:border-gray-500 hover:text-white transition"
+              >
+                {item}
+              </button>
+            ))}
+          </div>
 
-  </div>
-  {/* ✅ Left wrapper yahan close hua */}
+        </div>
+        {/* ✅ Left wrapper yahan close hua */}
 
-  {/* Right: Search + Bell + Avatar */}
-  <div className="flex items-center gap-3 relative">
+        {/* Right: Search + Bell + Avatar */}
+        <div className="flex items-center gap-3 relative">
 
-    {/* Search Button */}
-    <div className="relative">
-      {showSearch ? (
-        <input
-          type="text"
-          autoFocus
-          placeholder="Search companies, guides..."
-          onBlur={() => setShowSearch(false)}
-          className="w-48 bg-gray-800 border border-gray-700 rounded-full px-4 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
-        />
-      ) : (
-        <button
-          onClick={() => setShowSearch(true)}
-          className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition"
-        >
-          🔍
-        </button>
-      )}
-    </div>
+          {/* Search Button */}
+          <div className="relative">
+            {showSearch ? (
+              <input
+                type="text"
+                autoFocus
+                placeholder="Search companies, guides..."
+                onBlur={() => setShowSearch(false)}
+                className="w-48 bg-gray-800 border border-gray-700 rounded-full px-4 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
+              />
+            ) : (
+              <button
+                onClick={() => setShowSearch(true)}
+                className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition"
+              >
+                🔍
+              </button>
+            )}
+          </div>
 
-    {/* Notification Bell */}
-    <button className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition relative">
-      🔔
-      <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-    </button>
+          {/* Notification Bell */}
+          <button className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition relative">
+            🔔
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+          </button>
 
-    {/* Avatar Button */}
-    <div
-      className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
-      onClick={() => setShowProfile(!showProfile)}
-    >
-      S
-    </div>
+          {/* Avatar Button */}
+          <div
+            className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
+            onClick={() => setShowProfile(!showProfile)}
+          >
+            S
+          </div>
 
-    {/* Profile Dropdown */}
-    {showProfile && (
-      <div className="absolute right-0 top-12 w-72 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+          {/* Profile Dropdown */}
+          {showProfile && (
+            <div className="absolute right-0 top-12 w-72 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
 
-        <div className="bg-purple-900/30 px-5 py-4 border-b border-gray-700">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
-              S
+              <div className="bg-purple-900/30 px-5 py-4 border-b border-gray-700">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
+                    S
+                  </div>
+                  <div>
+                    <p className="font-semibold text-white">{profileData.name}</p>
+                    <p className="text-gray-400 text-xs">{profileData.email}</p>
+                    <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full mt-1 inline-block">
+                      Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 border-b border-gray-700">
+                <div className="text-center py-3 border-r border-gray-700">
+                  <p className="text-white font-bold text-lg">70%</p>
+                  <p className="text-gray-400 text-xs">Readiness</p>
+                </div>
+                <div className="text-center py-3 border-r border-gray-700">
+                  <p className="text-white font-bold text-lg">24</p>
+                  <p className="text-gray-400 text-xs">Practiced</p>
+                </div>
+                <div className="text-center py-3">
+                  <p className="text-white font-bold text-lg">5</p>
+                  <p className="text-gray-400 text-xs">Companies</p>
+                </div>
+              </div>
+
+              <div className="py-2">
+                <button
+                  onClick={() => { setShowProfile(false); navigate('/resume'); }}
+                  className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
+                >
+                  <span>📄</span> My Resume
+                </button>
+                <button
+                  onClick={() => { setShowProfile(false); navigate('/readiness'); }}
+                  className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
+                >
+                  <span>🎯</span> Readiness Score
+                </button>
+                <button
+                  onClick={() => { setShowProfile(false); }}
+                  className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
+                >
+                  <span>⚙️</span> Settings
+                </button>
+              </div>
+
+              <div className="border-t border-gray-700 p-3">
+                <button
+                  onClick={handleLogout}
+                  className="w-full py-2.5 bg-red-900/40 hover:bg-red-900/70 text-red-400 rounded-xl text-sm font-semibold transition"
+                >
+                  Logout
+                </button>
+              </div>
+
             </div>
-            <div>
-              <p className="font-semibold text-white">{profileData.name}</p>
-              <p className="text-gray-400 text-xs">{profileData.email}</p>
-              <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full mt-1 inline-block">
-                Active
-              </span>
-            </div>
-          </div>
+          )}
+
+          {/* Click outside to close */}
+          {showProfile && (
+            <div
+              className="fixed inset-0 z-40"
+              onClick={() => setShowProfile(false)}
+            />
+          )}
+
         </div>
+        {/* Right wrapper close */}
 
-        <div className="grid grid-cols-3 border-b border-gray-700">
-          <div className="text-center py-3 border-r border-gray-700">
-            <p className="text-white font-bold text-lg">70%</p>
-            <p className="text-gray-400 text-xs">Readiness</p>
-          </div>
-          <div className="text-center py-3 border-r border-gray-700">
-            <p className="text-white font-bold text-lg">24</p>
-            <p className="text-gray-400 text-xs">Practiced</p>
-          </div>
-          <div className="text-center py-3">
-            <p className="text-white font-bold text-lg">5</p>
-            <p className="text-gray-400 text-xs">Companies</p>
-          </div>
-        </div>
-
-        <div className="py-2">
-          <button
-            onClick={() => { setShowProfile(false); navigate('/resume'); }}
-            className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
-          >
-            <span>📄</span> My Resume
-          </button>
-          <button
-            onClick={() => { setShowProfile(false); navigate('/readiness'); }}
-            className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
-          >
-            <span>🎯</span> Readiness Score
-          </button>
-          <button
-            onClick={() => { setShowProfile(false); }}
-            className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
-          >
-            <span>⚙️</span> Settings
-          </button>
-        </div>
-
-        <div className="border-t border-gray-700 p-3">
-          <button
-            onClick={handleLogout}
-            className="w-full py-2.5 bg-red-900/40 hover:bg-red-900/70 text-red-400 rounded-xl text-sm font-semibold transition"
-          >
-            Logout
-          </button>
-        </div>
-
-      </div>
-    )}
-
-    {/* Click outside to close */}
-    {showProfile && (
-      <div
-        className="fixed inset-0 z-40"
-        onClick={() => setShowProfile(false)}
-      />
-    )}
-
-  </div>
-  {/* Right wrapper close */}
-
-</nav>
+      </nav>
 
       <div className="flex flex-1">
         {/* Sidebar */}
@@ -311,6 +313,12 @@ const Dashboard = () => {
                       <p className="text-sm font-semibold text-white">{c.name}</p>
                       <p className="text-xs text-gray-400">{c.rounds} · {c.skills}</p>
                     </div>
+                    <button
+                      onClick={() => toggleBookmark({ id: `c-${i}`, type: 'Company', text: c.name, meta: `${c.rounds} · ${c.skills}` })}
+                      className="mr-1"
+                    >
+                      {isBookmarked(`c-${i}`) ? '⭐' : '☆'}
+                    </button>
                     <span className={`text-xs px-2 py-1 rounded-full ${c.diffColor}`}>{c.diff}</span>
                   </div>
                 ))}
@@ -372,7 +380,15 @@ const Dashboard = () => {
               <div className="space-y-3">
                 {mockQuestions.map((q, i) => (
                   <div key={i} className="bg-gray-800 rounded-xl p-3">
-                    <p className="text-sm text-white mb-2">{q.q}</p>
+                    <div className="flex justify-between items-start mb-2">
+                      <p className="text-sm text-white flex-1">{q.q}</p>
+                      <button
+                        onClick={() => toggleBookmark({ id: `q-${i}`, type: 'Question', text: q.q, meta: q.tag })}
+                        className="ml-2 flex-shrink-0"
+                      >
+                        {isBookmarked(`q-${i}`) ? '⭐' : '☆'}
+                      </button>
+                    </div>
                     <div className="flex items-center justify-between">
                       <span className={`text-xs px-2 py-0.5 rounded-full ${q.tagColor}`}>{q.tag}</span>
                       <span className="text-xs text-gray-400">Score: {q.score}</span>

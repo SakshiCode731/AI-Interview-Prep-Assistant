@@ -13,6 +13,7 @@ import Chatbot from './pages/Chatbot';
 import DressingGuide from './pages/DressingGuide';
 import ConfidenceGuide from './pages/ConfidenceGuide';
 import BehaviorGuide from './pages/Behavior';
+import Bookmarks from './pages/Bookmarks';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -54,6 +55,9 @@ const App = () => {
       } />
       <Route path="/behavior-guide" element={
         <ProtectedRoute><BehaviorGuide /></ProtectedRoute>
+      } />
+      <Route path="/bookmarks" element={
+        <ProtectedRoute><Bookmarks /></ProtectedRoute>
       } />
     </Routes>
   );
