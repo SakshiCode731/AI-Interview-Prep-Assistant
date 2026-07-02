@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [dressingTab, setDressingTab] = useState('male');
   const [showProfile, setShowProfile] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [profileData, setProfileData] = useState({ name: 'Sakshi Gautam', email: 'sakshi@test.com' });
 
@@ -17,6 +18,13 @@ const Dashboard = () => {
     logout();
     navigate('/');
   };
+
+  const notifications = [
+    { id: 1, icon: '🎯', title: 'Readiness score updated', desc: 'Your score improved to 70% this week', time: '2h ago', unread: true },
+    { id: 2, icon: '🏢', title: 'New drive announced', desc: 'Amazon campus drive scheduled next week', time: '5h ago', unread: true },
+    { id: 3, icon: '❓', title: 'Practice reminder', desc: "You haven't practiced mock interview in 3 days", time: '1d ago', unread: false },
+    { id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false },
+  ];
 
   const stats = [
     { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400' },
@@ -110,6 +118,8 @@ const Dashboard = () => {
                   if (item === 'Companies') navigate('/companies');
                   if (item === 'Practice') navigate('/mock-interview');
                   if (item === 'Dashboard') navigate('/dashboard');
+                  if (item === 'Guides') navigate('/dressing-guide');
+                  if (item === 'Progress') navigate('/readiness');
                 }}
                 className="px-5 py-2 rounded-full text-sm font-medium border border-gray-700 bg-gray-900 text-gray-200 hover:border-gray-500 hover:text-white transition"
               >
@@ -145,11 +155,69 @@ const Dashboard = () => {
           </div>
 
           {/* Notification Bell */}
-          <button className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition relative">
-            🔔
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
+          {/* Notification Bell */}
+          {/* Notification Bell */}
+          <div className="relative">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-white transition relative"
+            >
+              🔔
+              {notifications.some(n => n.unread) && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full"></span>
+              )}
+            </button>
 
+            {/* Notification Dropdown */}
+            {showNotifications && (
+              <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+
+                {/* Header */}
+                <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
+                  <p className="font-semibold text-white">Notifications</p>
+                  <span className="text-xs text-purple-400">{notifications.filter(n => n.unread).length} new</span>
+                </div>
+
+                {/* List */}
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 hover:bg-gray-800 transition cursor-pointer ${n.unread ? 'bg-gray-800/40' : ''}`}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
+                        {n.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-white">{n.title}</p>
+                          {n.unread && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{n.desc}</p>
+                        <p className="text-xs text-gray-500 mt-1">{n.time}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Footer */}
+                <div className="p-3 border-t border-gray-700">
+                  <button className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition">
+                    Mark all as read
+                  </button>
+                </div>
+
+              </div>
+            )}
+
+            {/* Click outside to close */}
+            {showNotifications && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowNotifications(false)}
+              />
+            )}
+          </div>
           {/* Avatar Button */}
           <div
             className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
@@ -259,227 +327,83 @@ const Dashboard = () => {
           ))}
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 p-6 overflow-y-auto">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-2xl font-bold">Good morning, Sakshi</h1>
-            <p className="text-gray-400 text-sm">Your interview readiness snapshot for today</p>
+{/* Main Content */}
+<main className="flex-1 p-6 overflow-y-auto">
+  {/* Header */}
+  <div className="mb-6">
+    <h1 className="text-2xl font-bold">Good morning, Sakshi</h1>
+    <p className="text-gray-400 text-sm">Your interview readiness snapshot for today</p>
+  </div>
+
+  {/* Stats Row */}
+  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    {stats.map((s, i) => (
+      <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+        <p className="text-gray-400 text-xs mb-2">{s.label}</p>
+        <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+        <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
+      </div>
+    ))}
+  </div>
+
+  {/* Skill Gap + Readiness Breakdown */}
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    {/* Skill Gap Analysis */}
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-semibold">🎯 Skill gap analysis</h3>
+        <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
+      </div>
+      <div className="space-y-3">
+        {skills.map((s, i) => (
+          <div key={i} className="flex items-center gap-3">
+            <span className="text-gray-400 text-xs w-24 flex-shrink-0">{s.name}</span>
+            <div className="flex-1 bg-gray-700 rounded-full h-2">
+              <div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct}%` }}></div>
+            </div>
+            <span className="text-gray-400 text-xs w-8 text-right">{s.pct}%</span>
           </div>
+        ))}
+      </div>
+    </div>
 
-          {/* Stats Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {stats.map((s, i) => (
-              <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                <p className="text-gray-400 text-xs mb-2">{s.label}</p>
-                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
-                <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
-              </div>
-            ))}
+    {/* Readiness Breakdown */}
+    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="font-semibold">🎯 Readiness breakdown</h3>
+        <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
+      </div>
+      <div className="flex justify-center mb-4">
+        <div className="relative w-24 h-24">
+          <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1f2937" strokeWidth="3" />
+            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3b82f6" strokeWidth="3"
+              strokeDasharray="70 30" strokeLinecap="round" />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-xl font-bold">70</span>
+            <span className="text-xs text-gray-400">/100</span>
           </div>
-
-          {/* Skill Gap + Company Prep */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            {/* Skill Gap */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">🎯 Skill gap analysis</h3>
-                <button onClick={() => navigate('/readiness')} className="text-blue-400 text-xs hover:underline">View all</button>
-              </div>
-              <div className="space-y-3">
-                {skills.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-gray-400 text-xs w-24 flex-shrink-0">{s.name}</span>
-                    <div className="flex-1 bg-gray-700 rounded-full h-2">
-                      <div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct}%` }}></div>
-                    </div>
-                    <span className="text-gray-400 text-xs w-8 text-right">{s.pct}%</span>
-                  </div>
-                ))}
-              </div>
+        </div>
+      </div>
+      <div className="space-y-2">
+        {readinessBreakdown.map((r, i) => (
+          <div key={i} className="flex items-center justify-between text-sm">
+            <div className="flex items-center gap-2">
+              <div className={`w-2 h-2 rounded-full ${r.color}`}></div>
+              <span className="text-gray-400 text-xs">{r.label}</span>
             </div>
-
-            {/* Company Prep */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-semibold">🏢 Company prep</h3>
-                <button onClick={() => navigate('/companies')} className="text-blue-400 text-xs hover:underline">Browse all</button>
-              </div>
-              <div className="space-y-3">
-                {companies.map((c, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gray-700 flex items-center justify-center text-xs font-bold text-gray-300 flex-shrink-0">{c.abbr}</div>
-                    <div className="flex-1">
-                      <p className="text-sm font-semibold text-white">{c.name}</p>
-                      <p className="text-xs text-gray-400">{c.rounds} · {c.skills}</p>
-                    </div>
-                    <button
-                      onClick={() => toggleBookmark({ id: `c-${i}`, type: 'Company', text: c.name, meta: `${c.rounds} · ${c.skills}` })}
-                      className="mr-1"
-                    >
-                      {isBookmarked(`c-${i}`) ? '⭐' : '☆'}
-                    </button>
-                    <span className={`text-xs px-2 py-1 rounded-full ${c.diffColor}`}>{c.diff}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <span className="text-white text-xs">{r.pct}%</span>
           </div>
+        ))}
+      </div>
+    </div>
 
-          {/* Readiness + Chatbot + Mock Interview */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
-            {/* Readiness Breakdown */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <h3 className="font-semibold mb-4">🎯 Readiness breakdown</h3>
-              <div className="flex justify-center mb-4">
-                <div className="relative w-24 h-24">
-                  <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1f2937" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3b82f6" strokeWidth="3"
-                      strokeDasharray="70 30" strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-xl font-bold">70</span>
-                    <span className="text-xs text-gray-400">/100</span>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                {readinessBreakdown.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${r.color}`}></div>
-                      <span className="text-gray-400 text-xs">{r.label}</span>
-                    </div>
-                    <span className="text-white text-xs">{r.pct}%</span>
-                  </div>
-                ))}
-              </div>
-            </div>
+  </div>
 
-            {/* AI Chatbot */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <h3 className="font-semibold mb-4">🤖 AI chatbot</h3>
-              <div className="bg-gray-800 rounded-xl p-3 text-sm text-gray-300 mb-3">
-                Hi Sakshi! Ready to prep? Ask me anything about interviews.
-              </div>
-              <div className="bg-blue-700 rounded-xl p-3 text-sm text-white mb-3">
-                How to prepare for Amazon?
-              </div>
-              <div className="bg-gray-800 rounded-xl p-3 text-sm text-gray-300 mb-3">
-                Focus on DSA (LeetCode medium) + Leadership Principles. Practice STAR method stories for behavioral rounds.
-              </div>
-              <button onClick={() => navigate('/chatbot')} className="w-full py-2 bg-purple-600 hover:bg-purple-700 rounded-xl text-sm font-semibold transition">
-                Open Chatbot →
-              </button>
-            </div>
-
-            {/* Mock Interview */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <h3 className="font-semibold mb-4">❓ Mock interview</h3>
-              <div className="space-y-3">
-                {mockQuestions.map((q, i) => (
-                  <div key={i} className="bg-gray-800 rounded-xl p-3">
-                    <div className="flex justify-between items-start mb-2">
-                      <p className="text-sm text-white flex-1">{q.q}</p>
-                      <button
-                        onClick={() => toggleBookmark({ id: `q-${i}`, type: 'Question', text: q.q, meta: q.tag })}
-                        className="ml-2 flex-shrink-0"
-                      >
-                        {isBookmarked(`q-${i}`) ? '⭐' : '☆'}
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className={`text-xs px-2 py-0.5 rounded-full ${q.tagColor}`}>{q.tag}</span>
-                      <span className="text-xs text-gray-400">Score: {q.score}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <button onClick={() => navigate('/mock-interview')} className="w-full mt-3 py-2 bg-purple-600 hover:bg-purple-700 rounded-xl text-sm font-semibold transition">
-                Start Practice →
-              </button>
-            </div>
-          </div>
-
-          {/* Dressing Guide + Behavior Guide */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
-            {/* Dressing Guide */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">👔 Dressing guide</h3>
-                <button onClick={() => navigate('/dressing-guide')} className="text-blue-400 text-xs hover:underline">View full</button>
-              </div>
-              <div className="flex gap-2 mb-4">
-                {['male', 'female'].map(t => (
-                  <button key={t} onClick={() => setDressingTab(t)}
-                    className={`px-4 py-1.5 rounded-lg text-sm font-semibold capitalize transition ${dressingTab === t ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'}`}>
-                    {t === 'male' ? 'Male' : 'Female'}
-                  </button>
-                ))}
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <p className="text-green-400 text-xs font-semibold mb-2">✓ Do's</p>
-                  <ul className="space-y-1">
-                    {dressingDos[dressingTab].map((d, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
-                        <span className="text-green-400 mt-0.5">•</span>{d}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <p className="text-red-400 text-xs font-semibold mb-2">✗ Don'ts</p>
-                  <ul className="space-y-1">
-                    {dressingDonts[dressingTab].map((d, i) => (
-                      <li key={i} className="flex items-start gap-2 text-xs text-gray-300">
-                        <span className="text-red-400 mt-0.5">•</span>{d}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Behavior Guide */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold">🤝 Behavior guide</h3>
-                <button onClick={() => navigate('/behavior-guide')} className="text-blue-400 text-xs hover:underline">View full</button>
-              </div>
-              <div className="space-y-3">
-                {behaviorItems.map((b, i) => (
-                  <div key={i} className="flex items-start gap-3 bg-gray-800 rounded-xl p-3">
-                    <div className="w-8 h-8 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">{b.icon}</div>
-                    <div>
-                      <p className="text-sm font-semibold text-white">{b.title}</p>
-                      <p className="text-xs text-gray-400">{b.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Confidence Guide */}
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="font-semibold">🧘 Confidence and calmness guide</h3>
-              <button onClick={() => navigate('/confidence-guide')} className="text-blue-400 text-xs hover:underline">View full</button>
-            </div>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {confidenceTips.map((tip, i) => (
-                <div key={i} className="bg-gray-800 rounded-xl p-4 text-center">
-                  <div className="text-2xl mb-2">{tip.icon}</div>
-                  <p className="text-sm font-semibold text-white mb-1">{tip.title}</p>
-                  <p className="text-xs text-gray-400 leading-relaxed">{tip.desc}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-        </main>
+</main>
+       
       </div>
     </div>
   );

@@ -14,6 +14,7 @@ import DressingGuide from './pages/DressingGuide';
 import ConfidenceGuide from './pages/ConfidenceGuide';
 import BehaviorGuide from './pages/Behavior';
 import Bookmarks from './pages/Bookmarks';
+import ProgressReport from './pages/ProgressReport';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -58,6 +59,9 @@ const App = () => {
       } />
       <Route path="/bookmarks" element={
         <ProtectedRoute><Bookmarks /></ProtectedRoute>
+      } />
+      <Route path="/progress" element={
+        <ProtectedRoute><ProgressReport /></ProtectedRoute>
       } />
     </Routes>
   );
