@@ -1,23 +1,27 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../services/api';
+import { Atom } from 'lucide-react';
 
 const CompanyPrep = () => {
   const [companies, setCompanies] = useState([]);
-  const [search, setSearch] = useState('');
+  const [searchParams] = useSearchParams();
+  const [search, setSearch] = useState(searchParams.get('search') || '');   // ✅
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchCompanies();
-  }, []);
 
   const fetchCompanies = async (keyword = '') => {
     setLoading(true);
     try {
       const res = await API.get(`/companies${keyword ? `?search=${keyword}` : ''}`);
       setCompanies(res.data);
+
+      // Agar sirf ek hi company match hui aur search se aaye hain, toh auto-select karo
+      if (keyword && res.data.length === 1) {
+        setSelected(res.data[0]);
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -25,10 +29,19 @@ const CompanyPrep = () => {
     }
   };
 
+  // handleSearch ko simple rakho — sirf state update
   const handleSearch = (e) => {
     setSearch(e.target.value);
-    fetchCompanies(e.target.value);
   };
+
+  // Debounce: 400ms rukne ke baad hi API call ho
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      fetchCompanies(search);
+    }, 400);
+
+    return () => clearTimeout(delayDebounce);
+  }, [search]);
 
   const difficultyColor = (d) => {
     if (d === 'Easy') return 'text-green-400 bg-green-900/30 border-green-800';
@@ -40,7 +53,10 @@ const CompanyPrep = () => {
     <div className="min-h-screen bg-gray-950 text-white">
       {/* Navbar */}
       <nav className="bg-gray-900 border-b border-gray-800 px-8 py-4 flex justify-between items-center">
-        <span className="text-xl font-bold text-purple-400">PrepAI</span>
+        <div className="flex items-center gap-2">
+  <Waypoints className="text-purple-400 w-6 h-6" strokeWidth={2} />
+  <span className="text-xl font-bold text-purple-400">PrepAI</span>
+</div>
         <button
           onClick={() => navigate('/dashboard')}
           className="text-sm text-gray-400 hover:text-white border border-gray-700 px-4 py-2 rounded-xl transition"
@@ -76,11 +92,10 @@ const CompanyPrep = () => {
               <div
                 key={company._id}
                 onClick={() => setSelected(company)}
-                className={`bg-gray-900 border rounded-2xl p-4 cursor-pointer transition ${
-                  selected?._id === company._id
+                className={`bg-gray-900 border rounded-2xl p-4 cursor-pointer transition ${selected?._id === company._id
                     ? 'border-purple-500 bg-purple-900/10'
                     : 'border-gray-800 hover:border-gray-600'
-                }`}
+                  }`}
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold text-white">{company.name}</h4>

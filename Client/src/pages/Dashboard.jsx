@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
+import { Waypoints } from 'lucide-react';
+
 
 const Dashboard = () => {
   const { logout } = useAuth();
@@ -10,6 +12,7 @@ const Dashboard = () => {
   const [dressingTab, setDressingTab] = useState('male');
   const [showProfile, setShowProfile] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [profileData, setProfileData] = useState({ name: 'Sakshi Gautam', email: 'sakshi@test.com' });
@@ -104,9 +107,9 @@ const Dashboard = () => {
 
           {/* Logo */}
           <div className="flex items-center gap-2">
-            <span className="text-blue-400 text-xl">⬡</span>
-            <span className="text-white font-bold text-lg">PrepAI</span>
-          </div>
+  <Waypoints className="text-blue-400 w-6 h-6" strokeWidth={2} />
+  <span className="text-white font-bold text-lg">PrepAI</span>
+</div>
 
           {/* Nav Pills */}
           <div className="hidden md:flex gap-2">
@@ -141,7 +144,16 @@ const Dashboard = () => {
                 type="text"
                 autoFocus
                 placeholder="Search companies, guides..."
-                onBlur={() => setShowSearch(false)}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim() !== '') {
+                    navigate(`/companies?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setShowSearch(false);
+                    setSearchQuery('');
+                  }
+                }}
+                onBlur={() => setTimeout(() => setShowSearch(false), 150)}
                 className="w-48 bg-gray-800 border border-gray-700 rounded-full px-4 py-1.5 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-purple-500"
               />
             ) : (
@@ -327,83 +339,83 @@ const Dashboard = () => {
           ))}
         </aside>
 
-{/* Main Content */}
-<main className="flex-1 p-6 overflow-y-auto">
-  {/* Header */}
-  <div className="mb-6">
-    <h1 className="text-2xl font-bold">Good morning, Sakshi</h1>
-    <p className="text-gray-400 text-sm">Your interview readiness snapshot for today</p>
-  </div>
+        {/* Main Content */}
+        <main className="flex-1 p-6 overflow-y-auto">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold">Good morning, Sakshi</h1>
+            <p className="text-gray-400 text-sm">Your interview readiness snapshot for today</p>
+          </div>
 
-  {/* Stats Row */}
-  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-    {stats.map((s, i) => (
-      <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-        <p className="text-gray-400 text-xs mb-2">{s.label}</p>
-        <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
-        <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
-      </div>
-    ))}
-  </div>
+          {/* Stats Row */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+            {stats.map((s, i) => (
+              <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                <p className="text-gray-400 text-xs mb-2">{s.label}</p>
+                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+                <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
+              </div>
+            ))}
+          </div>
 
-  {/* Skill Gap + Readiness Breakdown */}
-  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          {/* Skill Gap + Readiness Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
-    {/* Skill Gap Analysis */}
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold">🎯 Skill gap analysis</h3>
-        <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
-      </div>
-      <div className="space-y-3">
-        {skills.map((s, i) => (
-          <div key={i} className="flex items-center gap-3">
-            <span className="text-gray-400 text-xs w-24 flex-shrink-0">{s.name}</span>
-            <div className="flex-1 bg-gray-700 rounded-full h-2">
-              <div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct}%` }}></div>
+            {/* Skill Gap Analysis */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">🎯 Skill gap analysis</h3>
+                <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
+              </div>
+              <div className="space-y-3">
+                {skills.map((s, i) => (
+                  <div key={i} className="flex items-center gap-3">
+                    <span className="text-gray-400 text-xs w-24 flex-shrink-0">{s.name}</span>
+                    <div className="flex-1 bg-gray-700 rounded-full h-2">
+                      <div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct}%` }}></div>
+                    </div>
+                    <span className="text-gray-400 text-xs w-8 text-right">{s.pct}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <span className="text-gray-400 text-xs w-8 text-right">{s.pct}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
 
-    {/* Readiness Breakdown */}
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="font-semibold">🎯 Readiness breakdown</h3>
-        <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
-      </div>
-      <div className="flex justify-center mb-4">
-        <div className="relative w-24 h-24">
-          <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1f2937" strokeWidth="3" />
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3b82f6" strokeWidth="3"
-              strokeDasharray="70 30" strokeLinecap="round" />
-          </svg>
-          <div className="absolute inset-0 flex flex-col items-center justify-center">
-            <span className="text-xl font-bold">70</span>
-            <span className="text-xs text-gray-400">/100</span>
-          </div>
-        </div>
-      </div>
-      <div className="space-y-2">
-        {readinessBreakdown.map((r, i) => (
-          <div key={i} className="flex items-center justify-between text-sm">
-            <div className="flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${r.color}`}></div>
-              <span className="text-gray-400 text-xs">{r.label}</span>
+            {/* Readiness Breakdown */}
+            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-semibold">🎯 Readiness breakdown</h3>
+                <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
+              </div>
+              <div className="flex justify-center mb-4">
+                <div className="relative w-24 h-24">
+                  <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1f2937" strokeWidth="3" />
+                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3b82f6" strokeWidth="3"
+                      strokeDasharray="70 30" strokeLinecap="round" />
+                  </svg>
+                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                    <span className="text-xl font-bold">70</span>
+                    <span className="text-xs text-gray-400">/100</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2">
+                {readinessBreakdown.map((r, i) => (
+                  <div key={i} className="flex items-center justify-between text-sm">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${r.color}`}></div>
+                      <span className="text-gray-400 text-xs">{r.label}</span>
+                    </div>
+                    <span className="text-white text-xs">{r.pct}%</span>
+                  </div>
+                ))}
+              </div>
             </div>
-            <span className="text-white text-xs">{r.pct}%</span>
+
           </div>
-        ))}
-      </div>
-    </div>
 
-  </div>
+        </main>
 
-</main>
-       
       </div>
     </div>
   );
