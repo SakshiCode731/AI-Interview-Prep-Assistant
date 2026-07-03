@@ -2,8 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
-import { Waypoints } from 'lucide-react';
-
+import aiLogo from '../assets/ai-logo.png';
 
 const Dashboard = () => {
   const { logout } = useAuth();
@@ -14,6 +13,7 @@ const Dashboard = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
+  const [selectedNotification, setSelectedNotification] = useState(null); // ✅ FIXED - andar hai
   const [activeNav, setActiveNav] = useState('Dashboard');
   const [profileData, setProfileData] = useState({ name: 'Sakshi Gautam', email: 'sakshi@test.com' });
 
@@ -99,19 +99,50 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
+
+      {/* ✅ FIXED - Notification Detail Modal - Profile dropdown ke BAHAR */}
+      {selectedNotification && (
+        <div
+          className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center px-4"
+          onClick={() => setSelectedNotification(null)}
+        >
+          <div
+            className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md p-6 shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-start gap-4 mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-2xl flex-shrink-0">
+                {selectedNotification.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-white">{selectedNotification.title}</h3>
+                <p className="text-xs text-gray-500 mt-1">{selectedNotification.time}</p>
+              </div>
+            </div>
+            <p className="text-gray-300 text-sm leading-relaxed mb-6">
+              {selectedNotification.desc}
+            </p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setSelectedNotification(null)}
+                className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-medium transition"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Top Navbar */}
       <nav className="bg-gray-950 border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
 
         {/* Left: Logo + Nav Pills */}
         <div className="flex items-center gap-6">
-
-          {/* Logo */}
           <div className="flex items-center gap-2">
-  <Waypoints className="text-blue-400 w-6 h-6" strokeWidth={2} />
-  <span className="text-white font-bold text-lg">PrepAI</span>
-</div>
-
-          {/* Nav Pills */}
+            <img src={aiLogo} alt="PrepAI logo" className="w-8 h-8" />
+            <span className="text-white font-bold text-lg">PrepAI</span>
+          </div>
           <div className="hidden md:flex gap-2">
             {['Dashboard', 'Companies', 'Practice', 'Guides', 'Progress'].map((item, i) => (
               <button
@@ -130,9 +161,7 @@ const Dashboard = () => {
               </button>
             ))}
           </div>
-
         </div>
-        {/* ✅ Left wrapper yahan close hua */}
 
         {/* Right: Search + Bell + Avatar */}
         <div className="flex items-center gap-3 relative">
@@ -167,8 +196,6 @@ const Dashboard = () => {
           </div>
 
           {/* Notification Bell */}
-          {/* Notification Bell */}
-          {/* Notification Bell */}
           <div className="relative">
             <button
               onClick={() => setShowNotifications(!showNotifications)}
@@ -180,21 +207,20 @@ const Dashboard = () => {
               )}
             </button>
 
-            {/* Notification Dropdown */}
             {showNotifications && (
               <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-
-                {/* Header */}
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
                   <p className="font-semibold text-white">Notifications</p>
                   <span className="text-xs text-purple-400">{notifications.filter(n => n.unread).length} new</span>
                 </div>
-
-                {/* List */}
                 <div className="max-h-96 overflow-y-auto">
                   {notifications.map((n) => (
                     <div
                       key={n.id}
+                      onClick={() => {
+                        setSelectedNotification(n);
+                        setShowNotifications(false);
+                      }}
                       className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 hover:bg-gray-800 transition cursor-pointer ${n.unread ? 'bg-gray-800/40' : ''}`}
                     >
                       <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
@@ -211,25 +237,19 @@ const Dashboard = () => {
                     </div>
                   ))}
                 </div>
-
-                {/* Footer */}
                 <div className="p-3 border-t border-gray-700">
                   <button className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition">
                     Mark all as read
                   </button>
                 </div>
-
               </div>
             )}
 
-            {/* Click outside to close */}
             {showNotifications && (
-              <div
-                className="fixed inset-0 z-40"
-                onClick={() => setShowNotifications(false)}
-              />
+              <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
             )}
           </div>
+
           {/* Avatar Button */}
           <div
             className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
@@ -241,7 +261,6 @@ const Dashboard = () => {
           {/* Profile Dropdown */}
           {showProfile && (
             <div className="absolute right-0 top-12 w-72 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-
               <div className="bg-purple-900/30 px-5 py-4 border-b border-gray-700">
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
@@ -301,20 +320,14 @@ const Dashboard = () => {
                   Logout
                 </button>
               </div>
-
             </div>
           )}
 
-          {/* Click outside to close */}
           {showProfile && (
-            <div
-              className="fixed inset-0 z-40"
-              onClick={() => setShowProfile(false)}
-            />
+            <div className="fixed inset-0 z-40" onClick={() => setShowProfile(false)} />
           )}
 
         </div>
-        {/* Right wrapper close */}
 
       </nav>
 
@@ -341,7 +354,6 @@ const Dashboard = () => {
 
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-y-auto">
-          {/* Header */}
           <div className="mb-6">
             <h1 className="text-2xl font-bold">Good morning, Sakshi</h1>
             <p className="text-gray-400 text-sm">Your interview readiness snapshot for today</p>
@@ -413,9 +425,7 @@ const Dashboard = () => {
             </div>
 
           </div>
-
         </main>
-
       </div>
     </div>
   );
