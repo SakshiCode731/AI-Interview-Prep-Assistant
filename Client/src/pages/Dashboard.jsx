@@ -29,6 +29,16 @@ const Dashboard = () => {
     { id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false },
   ]);
 
+const markAsRead = (id) => {
+  setNotifications(prev =>
+    prev.map(n => n.id === id ? { ...n, unread: false } : n)
+  );
+};
+
+const markAllAsRead = () => {
+  setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+};
+
   const stats = [
     { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400' },
     { label: 'Questions practiced', value: '24', sub: '+3 today', subColor: 'text-green-400' },
@@ -214,37 +224,45 @@ const Dashboard = () => {
                   <span className="text-xs text-purple-400">{notifications.filter(n => n.unread).length} new</span>
                 </div>
                 <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      onClick={() => {
-                        setSelectedNotification(n);
-                        setShowNotifications(false);
-                      }}
-                      className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 hover:bg-gray-800 transition cursor-pointer ${n.unread ? 'bg-gray-800/40' : ''}`}
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
-                        {n.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-white">{n.title}</p>
-                          {n.unread && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-0.5">{n.desc}</p>
-                        <p className="text-xs text-gray-500 mt-1">{n.time}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="p-3 border-t border-gray-700">
-                  <button className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition">
-                    Mark all as read
-                  </button>
-                </div>
-              </div>
-            )}
+  {notifications.map((n) => (
+    <div
+      key={n.id}
+      className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 transition ${n.unread ? 'bg-gray-800/40' : ''}`}
+    >
+      <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
+        {n.icon}
+      </div>
+      <div className="flex-1">
+        <div className="flex items-center gap-2">
+          <p className="text-sm font-semibold text-white">{n.title}</p>
+          {n.unread && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>}
+        </div>
+        <p className="text-xs text-gray-400 mt-0.5">{n.desc}</p>
+        <div className="flex items-center justify-between mt-1">
+          <p className="text-xs text-gray-500">{n.time}</p>
+          {n.unread && (
+            <button
+              onClick={() => markAsRead(n.id)}
+              className="text-xs text-purple-400 hover:text-purple-300 transition"
+            >
+              Mark as read
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  ))}
+</div>
 
+{/* Footer */}
+<div className="p-3 border-t border-gray-700">
+  <button
+    onClick={markAllAsRead}
+    className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition"
+  >
+    Mark all as read
+  </button>
+</div>
             {showNotifications && (
               <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
             )}
