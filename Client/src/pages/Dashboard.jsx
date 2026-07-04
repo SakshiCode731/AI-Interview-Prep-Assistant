@@ -22,12 +22,12 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const notifications = [
+  const [notifications, setNotifications] = useState([
     { id: 1, icon: '🎯', title: 'Readiness score updated', desc: 'Your score improved to 70% this week', time: '2h ago', unread: true },
     { id: 2, icon: '🏢', title: 'New drive announced', desc: 'Amazon campus drive scheduled next week', time: '5h ago', unread: true },
     { id: 3, icon: '❓', title: 'Practice reminder', desc: "You haven't practiced mock interview in 3 days", time: '1d ago', unread: false },
     { id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false },
-  ];
+  ]);
 
   const stats = [
     { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400' },
