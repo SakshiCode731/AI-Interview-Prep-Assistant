@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
-import aiLogo from '../assets/ai-logo.png';
 
 const Dashboard = () => {
   const { logout } = useAuth();
@@ -13,31 +12,47 @@ const Dashboard = () => {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
-  const [selectedNotification, setSelectedNotification] = useState(null); // ✅ FIXED - andar hai
   const [activeNav, setActiveNav] = useState('Dashboard');
-  const [profileData, setProfileData] = useState({ name: 'Sakshi Gautam', email: 'sakshi@test.com' });
+  const [profileData] = useState({ name: 'Sakshi Gautam', email: 'sakshi@test.com' });
+  const [selectedNotification, setSelectedNotification] = useState(null);
+
+  const [notifications, setNotifications] = useState([
+    { 
+      id: 1, icon: '🎯', title: 'Readiness score updated', desc: 'Your score improved to 70% this week', time: '2h ago', unread: true,
+      fullDetail: 'Your interview readiness score has improved from 65% to 70% this week! This is based on your recent activity — completing 3 mock interviews, updating your resume, and improving your DSA skill score by 8%. Keep practicing to reach 80%+ readiness.',
+      action: '/progress'
+    },
+    { 
+      id: 2, icon: '🏢', title: 'New drive announced', desc: 'Amazon campus drive scheduled next week', time: '5h ago', unread: true,
+      fullDetail: 'Amazon has announced a campus recruitment drive scheduled for next week. The process includes an Online Assessment, 2 Technical Rounds, a Bar Raiser round, and an HR round. Required skills: DSA, System Design, Problem Solving, and Leadership Principles. Make sure your resume and readiness score are up to date before the drive.',
+      action: '/companies'
+    },
+    { 
+      id: 3, icon: '❓', title: 'Practice reminder', desc: "You haven't practiced mock interview in 3 days", time: '1d ago', unread: false,
+      fullDetail: "It's been 3 days since your last mock interview practice session. Regular practice helps build confidence and improves your answer quality. Consider doing at least one mock interview session today to stay on track with your preparation goals.",
+      action: '/mock-interview'
+    },
+    { 
+      id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false,
+      fullDetail: 'Your answer to "Reverse a linked list iteratively" was evaluated and scored 8/10. Strengths: Clear approach, correct time complexity explanation. Improvement area: Consider mentioning edge cases like empty list or single node scenarios in your answer.',
+      action: '/answer-evaluator'
+    },
+  ]);
+
+  const markAsRead = (id) => {
+    setNotifications(prev =>
+      prev.map(n => n.id === id ? { ...n, unread: false } : n)
+    );
+  };
+
+  const markAllAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
+  };
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
-
-  const [notifications, setNotifications] = useState([
-    { id: 1, icon: '🎯', title: 'Readiness score updated', desc: 'Your score improved to 70% this week', time: '2h ago', unread: true },
-    { id: 2, icon: '🏢', title: 'New drive announced', desc: 'Amazon campus drive scheduled next week', time: '5h ago', unread: true },
-    { id: 3, icon: '❓', title: 'Practice reminder', desc: "You haven't practiced mock interview in 3 days", time: '1d ago', unread: false },
-    { id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false },
-  ]);
-
-const markAsRead = (id) => {
-  setNotifications(prev =>
-    prev.map(n => n.id === id ? { ...n, unread: false } : n)
-  );
-};
-
-const markAllAsRead = () => {
-  setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-};
 
   const stats = [
     { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400' },
@@ -55,13 +70,6 @@ const markAllAsRead = () => {
     { name: 'Communication', pct: 70, color: 'bg-blue-400' },
   ];
 
-  const companies = [
-    { abbr: 'TCS', name: 'Tata Consultancy Services', rounds: '4 rounds', skills: 'Java, DSA, SQL', diff: 'Easy', diffColor: 'bg-green-900 text-green-400' },
-    { abbr: 'INF', name: 'Infosys', rounds: '3 rounds', skills: 'Python, DSA', diff: 'Easy', diffColor: 'bg-green-900 text-green-400' },
-    { abbr: 'WIP', name: 'Wipro', rounds: '4 rounds', skills: 'C++, Java, DSA', diff: 'Medium', diffColor: 'bg-yellow-900 text-yellow-400' },
-    { abbr: 'AMZ', name: 'Amazon', rounds: '5 rounds', skills: 'DSA, System Design', diff: 'Hard', diffColor: 'bg-red-900 text-red-400' },
-  ];
-
   const readinessBreakdown = [
     { label: 'Skills match', pct: 75, color: 'bg-blue-400' },
     { label: 'Experience', pct: 40, color: 'bg-yellow-400' },
@@ -69,39 +77,9 @@ const markAllAsRead = () => {
     { label: 'Resume quality', pct: 65, color: 'bg-blue-300' },
   ];
 
-  const mockQuestions = [
-    { q: 'Explain difference between var, let and const', tag: 'Technical', tagColor: 'bg-blue-900 text-blue-300', score: '8/10' },
-    { q: 'Design a URL shortener like bit.ly', tag: 'System Design', tagColor: 'bg-yellow-900 text-yellow-300', score: '6/10' },
-    { q: 'Reverse a linked list iteratively', tag: 'DSA', tagColor: 'bg-purple-900 text-purple-300', score: '7/10' },
-  ];
-
-  const behaviorItems = [
-    { icon: '🚪', title: 'Entering the room', desc: 'Knock before entering, greet with a smile, wait to be seated.' },
-    { icon: '👁️', title: 'Eye contact', desc: 'Maintain 70% eye contact — confident but not intense.' },
-    { icon: '🗣️', title: 'Communication', desc: 'Speak clearly, pause before answering, avoid filler words.' },
-  ];
-
-  const confidenceTips = [
-    { icon: '💨', title: 'Breathing exercise', desc: '4-7-8 method: inhale 4 sec, hold 7, exhale 8. Repeat 3 times before interview.' },
-    { icon: '🧠', title: 'Mental preparation', desc: 'Visualize success. Remind yourself of your strengths and past achievements.' },
-    { icon: '🏃', title: 'Avoid overthinking', desc: 'Focus on one question at a time. It\'s okay to say "let me think for a moment."' },
-    { icon: '⏰', title: 'Arrive early', desc: 'Reach 15 mins before. Use the time to calm down, not to cram.' },
-    { icon: '👍', title: 'Positive body language', desc: 'Sit upright, uncross arms, nod while listening to show engagement.' },
-    { icon: '⭐', title: 'Confidence building', desc: 'Practice mock answers aloud. Confidence comes from repetition, not perfection.' },
-  ];
-
-  const dressingDos = {
-    male: ['Formal shirt + trousers', 'Clean polished shoes', 'Neutral colors — navy, grey', 'Well-ironed clothes'],
-    female: ['Formal salwar suit', 'Closed-toe formal shoes', 'Minimal jewellery', 'Neat, tied hair'],
-  };
-  const dressingDonts = {
-    male: ['Loud / bright colors', 'Casual jeans or t-shirts', 'Heavy accessories', 'Strong perfume'],
-    female: ['Heavy jewellery', 'Casual kurtis or jeans', 'Bold makeup', 'Very high heels'],
-  };
-
   const navItems = [
-    { section: 'OVERVIEW', items: [{ label: 'Dashboard', icon: '⊞', active: true }, { label: 'Progress tracker', icon: '📈' }] },
-    { section: 'PREPARATION', items: [{ label: 'Company prep', icon: '🏢', path: '/companies' }, { label: 'Resume upload', icon: '📄', path: '/resume' }, { label: 'Readiness score', icon: '🎯', path: '/readiness' }, { label: 'Skill gap analysis', icon: '📊' }] },
+    { section: 'OVERVIEW', items: [{ label: 'Dashboard', icon: '⊞', active: true }, { label: 'Progress tracker', icon: '📈', path: '/progress' }] },
+    { section: 'PREPARATION', items: [{ label: 'Company prep', icon: '🏢', path: '/companies' }, { label: 'Resume upload', icon: '📄', path: '/resume' }, { label: 'Readiness score', icon: '🎯', path: '/readiness' }, { label: 'Skill gap analysis', icon: '📊', path: '/progress' }] },
     { section: 'PRACTICE', items: [{ label: 'Mock interview', icon: '❓', path: '/mock-interview', badge: 5 }, { label: 'Answer evaluator', icon: '✅', path: '/answer-evaluator' }, { label: 'AI chatbot', icon: '🤖', path: '/chatbot' }] },
     { section: 'GUIDES', items: [{ label: 'Dressing guide', icon: '👔', path: '/dressing-guide' }, { label: 'Confidence guide', icon: '🧘', path: '/confidence-guide' }, { label: 'Behavior guide', icon: '🤝', path: '/behavior-guide' }] },
     { section: 'ACCOUNT', items: [{ label: 'Bookmarks', icon: '🔖', path: '/bookmarks' }, { label: 'Settings', icon: '⚙️' }] },
@@ -110,47 +88,13 @@ const markAllAsRead = () => {
   return (
     <div className="min-h-screen bg-gray-950 text-white flex flex-col">
 
-      {/* ✅ FIXED - Notification Detail Modal - Profile dropdown ke BAHAR */}
-      {selectedNotification && (
-        <div
-          className="fixed inset-0 bg-black/60 z-[60] flex items-center justify-center px-4"
-          onClick={() => setSelectedNotification(null)}
-        >
-          <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md p-6 shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-start gap-4 mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-2xl flex-shrink-0">
-                {selectedNotification.icon}
-              </div>
-              <div className="flex-1">
-                <h3 className="text-lg font-semibold text-white">{selectedNotification.title}</h3>
-                <p className="text-xs text-gray-500 mt-1">{selectedNotification.time}</p>
-              </div>
-            </div>
-            <p className="text-gray-300 text-sm leading-relaxed mb-6">
-              {selectedNotification.desc}
-            </p>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setSelectedNotification(null)}
-                className="flex-1 py-2.5 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl text-sm font-medium transition"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
       {/* Top Navbar */}
       <nav className="bg-gray-950 border-b border-gray-800 px-6 py-3 flex items-center justify-between sticky top-0 z-50">
 
         {/* Left: Logo + Nav Pills */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <img src={aiLogo} alt="PrepAI logo" className="w-8 h-8" />
+            <span className="text-blue-400 text-xl">⬡</span>
             <span className="text-white font-bold text-lg">PrepAI</span>
           </div>
           <div className="hidden md:flex gap-2">
@@ -163,7 +107,7 @@ const markAllAsRead = () => {
                   if (item === 'Practice') navigate('/mock-interview');
                   if (item === 'Dashboard') navigate('/dashboard');
                   if (item === 'Guides') navigate('/dressing-guide');
-                  if (item === 'Progress') navigate('/readiness');
+                  if (item === 'Progress') navigate('/progress');
                 }}
                 className="px-5 py-2 rounded-full text-sm font-medium border border-gray-700 bg-gray-900 text-gray-200 hover:border-gray-500 hover:text-white transition"
               >
@@ -174,9 +118,9 @@ const markAllAsRead = () => {
         </div>
 
         {/* Right: Search + Bell + Avatar */}
-        <div className="flex items-center gap-3 relative">
+        <div className="flex items-center gap-3">
 
-          {/* Search Button */}
+          {/* Search */}
           <div className="relative">
             {showSearch ? (
               <input
@@ -221,132 +165,150 @@ const markAllAsRead = () => {
               <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
                   <p className="font-semibold text-white">Notifications</p>
-                  <span className="text-xs text-purple-400">{notifications.filter(n => n.unread).length} new</span>
+                  <span className="text-xs text-purple-400">
+                    {notifications.filter(n => n.unread).length} new
+                  </span>
                 </div>
-                <div className="max-h-96 overflow-y-auto">
-  {notifications.map((n) => (
-    <div
-      key={n.id}
-      className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 transition ${n.unread ? 'bg-gray-800/40' : ''}`}
-    >
-      <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
-        {n.icon}
-      </div>
-      <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <p className="text-sm font-semibold text-white">{n.title}</p>
-          {n.unread && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>}
-        </div>
-        <p className="text-xs text-gray-400 mt-0.5">{n.desc}</p>
-        <div className="flex items-center justify-between mt-1">
-          <p className="text-xs text-gray-500">{n.time}</p>
-          {n.unread && (
-            <button
-              onClick={() => markAsRead(n.id)}
-              className="text-xs text-purple-400 hover:text-purple-300 transition"
-            >
-              Mark as read
-            </button>
-          )}
-        </div>
-      </div>
-    </div>
-  ))}
-</div>
 
-{/* Footer */}
-<div className="p-3 border-t border-gray-700">
-  <button
-    onClick={markAllAsRead}
-    className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition"
-  >
-    Mark all as read
-  </button>
-</div>
+                <div className="max-h-96 overflow-y-auto">
+                  {notifications.map((n) => (
+                    <div
+                      key={n.id}
+                      onClick={() => {
+                        setSelectedNotification(n);
+                        setShowNotifications(false);
+                      }}
+                      className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 hover:bg-gray-800 transition cursor-pointer ${n.unread ? 'bg-gray-800/40' : ''}`}
+                    >
+                      <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
+                        {n.icon}
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-semibold text-white">{n.title}</p>
+                          {n.unread && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>}
+                        </div>
+                        <p className="text-xs text-gray-400 mt-0.5">{n.desc}</p>
+                        <div className="flex items-center justify-between mt-1">
+                          <p className="text-xs text-gray-500">{n.time}</p>
+                          {n.unread && (
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                markAsRead(n.id);
+                              }}
+                              className="text-xs text-purple-400 hover:text-purple-300 transition"
+                            >
+                              Mark as read
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-3 border-t border-gray-700">
+                  <button
+                    onClick={markAllAsRead}
+                    className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition"
+                  >
+                    Mark all as read
+                  </button>
+                </div>
+              </div>
+            )}
+
             {showNotifications && (
-              <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowNotifications(false)}
+              />
             )}
           </div>
 
-          {/* Avatar Button */}
-          <div
-            className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
-            onClick={() => setShowProfile(!showProfile)}
-          >
-            S
+          {/* Avatar */}
+          <div className="relative">
+            <div
+              className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
+              onClick={() => setShowProfile(!showProfile)}
+            >
+              S
+            </div>
+
+            {showProfile && (
+              <div className="absolute right-0 top-12 w-72 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
+                <div className="bg-purple-900/30 px-5 py-4 border-b border-gray-700">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
+                      S
+                    </div>
+                    <div>
+                      <p className="font-semibold text-white">{profileData.name}</p>
+                      <p className="text-gray-400 text-xs">{profileData.email}</p>
+                      <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full mt-1 inline-block">
+                        Active
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 border-b border-gray-700">
+                  <div className="text-center py-3 border-r border-gray-700">
+                    <p className="text-white font-bold text-lg">70%</p>
+                    <p className="text-gray-400 text-xs">Readiness</p>
+                  </div>
+                  <div className="text-center py-3 border-r border-gray-700">
+                    <p className="text-white font-bold text-lg">24</p>
+                    <p className="text-gray-400 text-xs">Practiced</p>
+                  </div>
+                  <div className="text-center py-3">
+                    <p className="text-white font-bold text-lg">5</p>
+                    <p className="text-gray-400 text-xs">Companies</p>
+                  </div>
+                </div>
+
+                <div className="py-2">
+                  <button
+                    onClick={() => { setShowProfile(false); navigate('/resume'); }}
+                    className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
+                  >
+                    <span>📄</span> My Resume
+                  </button>
+                  <button
+                    onClick={() => { setShowProfile(false); navigate('/readiness'); }}
+                    className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
+                  >
+                    <span>🎯</span> Readiness Score
+                  </button>
+                  <button
+                    onClick={() => { setShowProfile(false); }}
+                    className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
+                  >
+                    <span>⚙️</span> Settings
+                  </button>
+                </div>
+
+                <div className="border-t border-gray-700 p-3">
+                  <button
+                    onClick={handleLogout}
+                    className="w-full py-2.5 bg-red-900/40 hover:bg-red-900/70 text-red-400 rounded-xl text-sm font-semibold transition"
+                  >
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showProfile && (
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setShowProfile(false)}
+              />
+            )}
           </div>
 
-          {/* Profile Dropdown */}
-          {showProfile && (
-            <div className="absolute right-0 top-12 w-72 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
-              <div className="bg-purple-900/30 px-5 py-4 border-b border-gray-700">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                    S
-                  </div>
-                  <div>
-                    <p className="font-semibold text-white">{profileData.name}</p>
-                    <p className="text-gray-400 text-xs">{profileData.email}</p>
-                    <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full mt-1 inline-block">
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-3 border-b border-gray-700">
-                <div className="text-center py-3 border-r border-gray-700">
-                  <p className="text-white font-bold text-lg">70%</p>
-                  <p className="text-gray-400 text-xs">Readiness</p>
-                </div>
-                <div className="text-center py-3 border-r border-gray-700">
-                  <p className="text-white font-bold text-lg">24</p>
-                  <p className="text-gray-400 text-xs">Practiced</p>
-                </div>
-                <div className="text-center py-3">
-                  <p className="text-white font-bold text-lg">5</p>
-                  <p className="text-gray-400 text-xs">Companies</p>
-                </div>
-              </div>
-
-              <div className="py-2">
-                <button
-                  onClick={() => { setShowProfile(false); navigate('/resume'); }}
-                  className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
-                >
-                  <span>📄</span> My Resume
-                </button>
-                <button
-                  onClick={() => { setShowProfile(false); navigate('/readiness'); }}
-                  className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
-                >
-                  <span>🎯</span> Readiness Score
-                </button>
-                <button
-                  onClick={() => { setShowProfile(false); }}
-                  className="w-full flex items-center gap-3 px-5 py-3 text-sm text-gray-300 hover:bg-gray-800 hover:text-white transition text-left"
-                >
-                  <span>⚙️</span> Settings
-                </button>
-              </div>
-
-              <div className="border-t border-gray-700 p-3">
-                <button
-                  onClick={handleLogout}
-                  className="w-full py-2.5 bg-red-900/40 hover:bg-red-900/70 text-red-400 rounded-xl text-sm font-semibold transition"
-                >
-                  Logout
-                </button>
-              </div>
-            </div>
-          )}
-
-          {showProfile && (
-            <div className="fixed inset-0 z-40" onClick={() => setShowProfile(false)} />
-          )}
-
         </div>
-
       </nav>
 
       <div className="flex flex-1">
@@ -445,6 +407,57 @@ const markAllAsRead = () => {
           </div>
         </main>
       </div>
+
+      {/* Notification Detail Modal */}
+      {selectedNotification && (
+        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
+          <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
+
+            {/* Header */}
+            <div className="flex items-start gap-4 p-6 border-b border-gray-800">
+              <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-2xl flex-shrink-0">
+                {selectedNotification.icon}
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-white text-lg">{selectedNotification.title}</h3>
+                <p className="text-gray-500 text-xs mt-1">{selectedNotification.time}</p>
+              </div>
+              <button
+                onClick={() => setSelectedNotification(null)}
+                className="text-gray-400 hover:text-white text-xl leading-none"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <p className="text-gray-300 text-sm leading-relaxed">{selectedNotification.fullDetail}</p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex gap-3 p-6 pt-0">
+              <button
+                onClick={() => setSelectedNotification(null)}
+                className="flex-1 py-2.5 border border-gray-700 text-gray-300 hover:text-white rounded-xl text-sm font-medium transition"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  navigate(selectedNotification.action);
+                  setSelectedNotification(null);
+                }}
+                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold transition"
+              >
+                View Details →
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };
