@@ -153,6 +153,21 @@ const CompanyPrep = () => {
                   </div>
                 </div>
 
+
+                {/* Start Company Mock Interview */}
+                <div className="bg-gradient-to-r from-purple-900/40 to-purple-800/20 border border-purple-700 rounded-2xl p-6 flex items-center justify-between">
+                  <div>
+                    <h4 className="font-semibold text-white text-lg mb-1">🎯 Company-Specific Mock Interview</h4>
+                    <p className="text-gray-400 text-sm">Practice with {selected.name}'s actual interview pattern — {selected.questions.length} real questions across {selected.rounds.length} rounds</p>
+                  </div>
+                  <button
+                    onClick={() => navigate(`/company-mock/${selected._id}`)}
+                    className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-xl transition flex-shrink-0"
+                  >
+                    Start Interview →
+                  </button>
+                </div>
+
                 {/* Interview Rounds */}
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                   <h4 className="text-sm text-gray-400 uppercase tracking-wider mb-4">Interview Rounds</h4>

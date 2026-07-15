@@ -15,6 +15,7 @@ import ConfidenceGuide from './pages/ConfidenceGuide';
 import BehaviorGuide from './pages/Behavior';
 import Bookmarks from './pages/Bookmarks';
 import ProgressReport from './pages/ProgressReport';
+import CompanyMockInterview from './pages/CompanyMockInterview';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -63,6 +64,9 @@ const App = () => {
       <Route path="/progress" element={
         <ProtectedRoute><ProgressReport /></ProtectedRoute>
       } />
+      <Route path="/company-mock/:companyId" element={
+  <ProtectedRoute><CompanyMockInterview /></ProtectedRoute>
+} />
     </Routes>
   );
 };
