@@ -72,5 +72,6 @@ const Login = () => {
     </div>
   );
 };
+// Login page - handles user authentication
 
 export default Login;
