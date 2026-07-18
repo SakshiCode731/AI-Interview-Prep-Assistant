@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import useSpeechToText from '../hooks/useSpeechToText';
 
 const CompanyMockInterview = () => {
   const { companyId } = useParams();
   const navigate = useNavigate();
+  const { isListening, transcript, error: voiceError, isSupported, startListening, stopListening, resetTranscript } = useSpeechToText();
 
   const [company, setCompany] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,6 +20,12 @@ const CompanyMockInterview = () => {
   useEffect(() => {
     fetchCompany();
   }, [companyId]);
+
+  useEffect(() => {
+    if (transcript) {
+      setAnswer(transcript);
+    }
+  }, [transcript]);
 
   const fetchCompany = async () => {
     try {
@@ -66,6 +74,7 @@ const CompanyMockInterview = () => {
       ]);
 
       setAnswer('');
+      resetTranscript();
       if (currentIndex + 1 < totalQuestions) {
         setCurrentIndex((prev) => prev + 1);
       } else {
@@ -92,6 +101,7 @@ const CompanyMockInterview = () => {
       },
     ]);
     setAnswer('');
+    resetTranscript();
     if (currentIndex + 1 < totalQuestions) {
       setCurrentIndex((prev) => prev + 1);
     } else {
@@ -170,14 +180,49 @@ const CompanyMockInterview = () => {
 
             {/* Answer Box */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-              <label className="text-sm text-gray-400 mb-2 block">Your Answer</label>
+              <div className="flex justify-between items-center mb-2">
+                <label className="text-sm text-gray-400">Your Answer</label>
+                {isSupported && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (isListening) {
+                        stopListening();
+                      } else {
+                        resetTranscript();
+                        startListening();
+                      }
+                    }}
+                    className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border transition ${
+                      isListening
+                        ? 'bg-red-900/40 border-red-700 text-red-400'
+                        : 'bg-purple-900/30 border-purple-700 text-purple-300 hover:bg-purple-900/50'
+                    }`}
+                  >
+                    {isListening ? (
+                      <>
+                        <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                        Listening... Tap to stop
+                      </>
+                    ) : (
+                      <>🎤 Speak your answer</>
+                    )}
+                  </button>
+                )}
+              </div>
               <textarea
                 value={answer}
                 onChange={(e) => setAnswer(e.target.value)}
                 rows={6}
-                placeholder="Type your answer as you would in a real interview..."
-                className="w-full px-4 py-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-purple-500 resize-none"
+                placeholder="Type your answer, or use the mic to speak as you would in a real interview..."
+                className={`w-full px-4 py-3 rounded-xl bg-gray-800 text-white border focus:outline-none resize-none transition ${
+                  isListening ? 'border-red-600 ring-1 ring-red-600' : 'border-gray-700 focus:border-purple-500'
+                }`}
               />
+              {voiceError && <p className="text-yellow-400 text-xs mt-1">{voiceError}</p>}
+              {!isSupported && (
+                <p className="text-gray-500 text-xs mt-1">Voice input works best in Chrome or Edge</p>
+              )}
 
               {error && <p className="text-red-400 text-sm mt-3">{error}</p>}
 

@@ -16,6 +16,7 @@ import BehaviorGuide from './pages/Behavior';
 import Bookmarks from './pages/Bookmarks';
 import ProgressReport from './pages/ProgressReport';
 import CompanyMockInterview from './pages/CompanyMockInterview';
+import CodingRound from "./pages/CodingRound";
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -67,6 +68,7 @@ const App = () => {
       <Route path="/company-mock/:companyId" element={
   <ProtectedRoute><CompanyMockInterview /></ProtectedRoute>
 } />
+<Route path="/coding-round" element={<CodingRound />} />
     </Routes>
   );
 };

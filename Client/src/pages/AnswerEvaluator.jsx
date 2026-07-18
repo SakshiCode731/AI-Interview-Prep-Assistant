@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
+import useSpeechToText from '../hooks/useSpeechToText';
 
 const AnswerEvaluator = () => {
+  const { isListening, transcript, error: voiceError, isSupported, startListening, stopListening, resetTranscript } = useSpeechToText();
   const [question, setQuestion] = useState('');
   const [userAnswer, setUserAnswer] = useState('');
   const [jobRole, setJobRole] = useState('');
@@ -10,6 +12,12 @@ const AnswerEvaluator = () => {
   const [result, setResult] = useState(null);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (transcript) {
+      setUserAnswer(transcript);
+    }
+  }, [transcript]);
 
   const handleSubmit = async () => {
     if (!question || !userAnswer || !jobRole) {
@@ -82,14 +90,49 @@ const AnswerEvaluator = () => {
           </div>
 
           <div>
-            <label className="text-sm text-gray-400 mb-1 block">Your Answer</label>
+            <div className="flex justify-between items-center mb-1">
+              <label className="text-sm text-gray-400">Your Answer</label>
+              {isSupported && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (isListening) {
+                      stopListening();
+                    } else {
+                      resetTranscript();
+                      startListening();
+                    }
+                  }}
+                  className={`flex items-center gap-2 text-xs px-3 py-1.5 rounded-full border transition ${
+                    isListening
+                      ? 'bg-red-900/40 border-red-700 text-red-400'
+                      : 'bg-purple-900/30 border-purple-700 text-purple-300 hover:bg-purple-900/50'
+                  }`}
+                >
+                  {isListening ? (
+                    <>
+                      <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
+                      Listening... Tap to stop
+                    </>
+                  ) : (
+                    <>🎤 Speak your answer</>
+                  )}
+                </button>
+              )}
+            </div>
             <textarea
-              placeholder="Write your answer here..."
+              placeholder="Write your answer here, or use the mic to speak..."
               value={userAnswer}
               onChange={(e) => setUserAnswer(e.target.value)}
               rows={5}
-              className="w-full px-4 py-3 rounded-xl bg-gray-800 text-white border border-gray-700 focus:outline-none focus:border-purple-500 resize-none"
+              className={`w-full px-4 py-3 rounded-xl bg-gray-800 text-white border focus:outline-none resize-none transition ${
+                isListening ? 'border-red-600 ring-1 ring-red-600' : 'border-gray-700 focus:border-purple-500'
+              }`}
             />
+            {voiceError && <p className="text-yellow-400 text-xs mt-1">{voiceError}</p>}
+            {!isSupported && (
+              <p className="text-gray-500 text-xs mt-1">Voice input works best in Chrome or Edge</p>
+            )}
           </div>
 
           {error && <p className="text-red-400 text-sm">{error}</p>}
