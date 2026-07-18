@@ -17,6 +17,7 @@ import Bookmarks from './pages/Bookmarks';
 import ProgressReport from './pages/ProgressReport';
 import CompanyMockInterview from './pages/CompanyMockInterview';
 import CodingRound from "./pages/CodingRound";
+import ProgressAnalytics from './pages/ProgressAnalytics';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -69,6 +70,7 @@ const App = () => {
   <ProtectedRoute><CompanyMockInterview /></ProtectedRoute>
 } />
 <Route path="/coding-round" element={<CodingRound />} />
+<Route path="/progress" element={<ProgressAnalytics />} />
     </Routes>
   );
 };
