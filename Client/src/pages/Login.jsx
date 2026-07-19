@@ -16,7 +16,12 @@ const Login = () => {
     setLoading(true);
     try {
       const res = await API.post('/auth/login', { email, password });
-      login(res.data.token);
+      login(res.data.token, {
+        _id: res.data._id,
+        name: res.data.name,
+        email: res.data.email,
+        role: res.data.role
+      });
       navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Login failed');

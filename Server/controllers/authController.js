@@ -27,7 +27,7 @@ const signupUser = async (req, res) => {
 
     // JWT token banao
     const token = jwt.sign(
-      { id: user._id },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: '30d' }
     );
@@ -37,6 +37,7 @@ const signupUser = async (req, res) => {
       _id: user._id,
       name: user.name,
       email: user.email,
+      role: user.role,
       token
     });
 

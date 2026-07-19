@@ -26,6 +26,7 @@ app.use('/api/readiness', readinessRoutes);
 app.use('/api/mock-interview', mockInterviewRoutes);
 app.use('/api/answer', answerEvaluatorRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 
 app.get('/', (req, res) => {
