@@ -18,13 +18,23 @@ import ProgressReport from './pages/ProgressReport';
 import CompanyMockInterview from './pages/CompanyMockInterview';
 import CodingRound from "./pages/CodingRound";
 import ProgressAnalytics from './pages/ProgressAnalytics';
+import AdminDashboard from './pages/AdminDashboard';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
   return token ? children : <Navigate to="/login" />;
 };
 
+const AdminRoute = ({ children }) => {
+  const { token, user } = useAuth();
+  if (!token) return <Navigate to="/login" />;
+  if (user?.role !== 'admin') return <Navigate to="/dashboard" />;
+  return children;
+};
+
 const App = () => {
+  const { user } = useAuth();
+
   return (
     <Routes>
       <Route path="/" element={<LandingPage />} />
@@ -64,13 +74,19 @@ const App = () => {
         <ProtectedRoute><Bookmarks /></ProtectedRoute>
       } />
       <Route path="/progress" element={
-        <ProtectedRoute><ProgressReport /></ProtectedRoute>
+        <ProtectedRoute><ProgressAnalytics /></ProtectedRoute>
       } />
       <Route path="/company-mock/:companyId" element={
-  <ProtectedRoute><CompanyMockInterview /></ProtectedRoute>
-} />
-<Route path="/coding-round" element={<CodingRound />} />
-<Route path="/progress" element={<ProgressAnalytics />} />
+        <ProtectedRoute><CompanyMockInterview /></ProtectedRoute>
+      } />
+      <Route path="/coding-round" element={
+        <ProtectedRoute><CodingRound /></ProtectedRoute>
+      } />
+      {user?.role === 'admin' && (
+        <Route path="/admin" element={
+          <AdminRoute><AdminDashboard /></AdminRoute>
+        } />
+      )}
     </Routes>
   );
 };
