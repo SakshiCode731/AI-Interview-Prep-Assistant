@@ -21,15 +21,15 @@ jobs:
 
       - name: Install client dependencies
         run: |
-          cd client
+          cd Client
           npm install
 
       - name: Build client
         run: |
-          cd client
+          cd Client
           npm run build
 
       - name: Install server dependencies
         run: |
-          cd server
+          cd Server
           npm install
