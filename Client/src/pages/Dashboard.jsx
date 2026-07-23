@@ -54,12 +54,12 @@ const Dashboard = () => {
     navigate('/');
   };
 
-  const stats = [
-    { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400' },
-    { label: 'Questions practiced', value: '24', sub: '+3 today', subColor: 'text-green-400' },
-    { label: 'Avg answer score', value: '7.8/10', sub: 'Good performance', subColor: 'text-yellow-400' },
-    { label: 'Companies saved', value: '5', sub: '2 upcoming drives', subColor: 'text-purple-400' },
-  ];
+ const stats = [
+  { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400', path: '/readiness' },
+  { label: 'Questions practiced', value: '24', sub: '+3 today', subColor: 'text-green-400', path: '/progress' },
+  { label: 'Avg answer score', value: '7.8/10', sub: 'Good performance', subColor: 'text-yellow-400', path: '/answer-evaluator' },
+  { label: 'Companies saved', value: '5', sub: '2 upcoming drives', subColor: 'text-purple-400', path: '/bookmarks' },
+];
 
   const skills = [
     { name: 'DSA', pct: 42, color: 'bg-red-500' },
