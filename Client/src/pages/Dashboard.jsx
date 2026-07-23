@@ -341,13 +341,17 @@ const Dashboard = () => {
 
           {/* Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {stats.map((s, i) => (
-              <div key={i} className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
-                <p className="text-gray-400 text-xs mb-2">{s.label}</p>
-                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
-                <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
-              </div>
-            ))}
+          {stats.map((s, i) => (
+  <div
+    key={i}
+    onClick={() => s.path && navigate(s.path)}
+    className="bg-gray-900 border border-gray-800 rounded-2xl p-4 cursor-pointer hover:border-purple-500 transition"
+  >
+    <p className="text-gray-400 text-xs mb-2">{s.label}</p>
+    <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+    <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
+  </div>
+))}
           </div>
 
           {/* Skill Gap + Readiness Breakdown */}
