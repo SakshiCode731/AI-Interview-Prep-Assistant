@@ -24,7 +24,7 @@ const Register = () => {
         email: res.data.email,
         role: res.data.role
       });
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError(err.response?.data?.message || 'Registration failed');
     } finally {
