@@ -11,18 +11,19 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
-  setLoading(true);
-  try {
-    await API.post('/auth/signup', { name, email, password });
-    navigate('/');
-  } catch (err) {
-    setError(err.response?.data?.message || 'Registration failed');
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await API.post('/auth/signup', { name, email, password });
+      localStorage.setItem('token', res.data.token);
+      navigate('/dashboard'); // ⚠️ apna actual dashboard route confirm karke yahan daalo
+    } catch (err) {
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center">
