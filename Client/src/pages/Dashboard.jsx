@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
 
 const Dashboard = () => {
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
   const navigate = useNavigate();
   const { toggleBookmark, isBookmarked } = useBookmarks();
   const [dressingTab, setDressingTab] = useState('male');
@@ -13,7 +13,6 @@ const Dashboard = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [activeNav, setActiveNav] = useState('Dashboard');
-  const [profileData] = useState({ name: 'Sakshi Gautam', email: 'sakshi@test.com' });
   const [selectedNotification, setSelectedNotification] = useState(null);
 
   const [notifications, setNotifications] = useState([
@@ -233,7 +232,7 @@ const Dashboard = () => {
               className="w-8 h-8 rounded-full bg-purple-600 flex items-center justify-center text-sm font-bold cursor-pointer hover:ring-2 hover:ring-purple-400 transition"
               onClick={() => setShowProfile(!showProfile)}
             >
-              S
+              {user?.name?.charAt(0).toUpperCase() || 'U'}
             </div>
 
             {showProfile && (
@@ -241,11 +240,11 @@ const Dashboard = () => {
                 <div className="bg-purple-900/30 px-5 py-4 border-b border-gray-700">
                   <div className="flex items-center gap-3">
                     <div className="w-12 h-12 rounded-full bg-purple-600 flex items-center justify-center text-lg font-bold flex-shrink-0">
-                      S
+                      {user?.name?.charAt(0).toUpperCase() || 'U'}
                     </div>
                     <div>
-                      <p className="font-semibold text-white">{profileData.name}</p>
-                      <p className="text-gray-400 text-xs">{profileData.email}</p>
+                      <p className="font-semibold text-white">{user?.name}</p>
+                      <p className="text-gray-400 text-xs">{user?.email}</p>
                       <span className="text-xs bg-green-900 text-green-400 px-2 py-0.5 rounded-full mt-1 inline-block">
                         Active
                       </span>
@@ -335,7 +334,7 @@ const Dashboard = () => {
         {/* Main Content */}
         <main className="flex-1 p-6 overflow-y-auto">
           <div className="mb-6">
-            <h1 className="text-2xl font-bold">Good morning, Sakshi</h1>
+            <h1 className="text-2xl font-bold">Good morning, {user?.name?.split(' ')[0] || 'there'}</h1>
             <p className="text-gray-400 text-sm">Your interview readiness snapshot for today</p>
           </div>
 
