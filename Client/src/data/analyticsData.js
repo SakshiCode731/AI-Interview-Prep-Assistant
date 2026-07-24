@@ -1,46 +1,28 @@
 export const analyticsData = {
-  readinessScore: 70,
-  readinessChange: 5,
-  questionsPracticed: 24,
-  questionsChangeToday: 3,
-  avgAnswerScore: 7.8,
-  companiesSaved: 5,
-  upcomingDrives: 2,
+  totalQuestionsAttempted: 24,
+  totalMockInterviews: 4,
+  avgOverallScore: 7.8,
 
-  skills: [
-    { name: 'DSA', score: 42, color: 'bg-red-500' },
-    { name: 'React', score: 82, color: 'bg-green-500' },
-    { name: 'Node.js', score: 76, color: 'bg-green-400' },
-    { name: 'System Design', score: 28, color: 'bg-red-500' },
-    { name: 'SQL', score: 58, color: 'bg-yellow-400' },
-    { name: 'Communication', score: 70, color: 'bg-blue-400' },
-  ],
-
-  readinessBreakdown: [
-    { label: 'Skills match', pct: 75, color: 'bg-blue-400' },
-    { label: 'Experience', pct: 40, color: 'bg-yellow-400' },
-    { label: 'Projects', pct: 80, color: 'bg-green-400' },
-    { label: 'Resume quality', pct: 65, color: 'bg-blue-300' },
-  ],
-
-  weeklyProgress: [
-    { week: 'Week 1', score: 50 },
-    { week: 'Week 2', score: 58 },
-    { week: 'Week 3', score: 64 },
-    { week: 'Week 4', score: 70 },
+  topicBreakdown: [
+    { topic: 'DSA', avgScore: 42, attempted: 8, status: 'weak' },
+    { topic: 'React', avgScore: 82, attempted: 6, status: 'strong' },
+    { topic: 'Node.js', avgScore: 76, attempted: 5, status: 'strong' },
+    { topic: 'System Design', avgScore: 28, attempted: 3, status: 'weak' },
+    { topic: 'SQL', avgScore: 58, attempted: 4, status: 'average' },
+    { topic: 'Communication', avgScore: 70, attempted: 6, status: 'average' },
   ],
 };
 
-// Returns the skill with the lowest score
-export const getWeakestArea = () => {
-  return analyticsData.skills.reduce((weakest, current) =>
-    current.score < weakest.score ? current : weakest
+// Returns the topic with the lowest avgScore
+export const getWeakestArea = (data) => {
+  return data.topicBreakdown.reduce((weakest, current) =>
+    current.avgScore < weakest.avgScore ? current : weakest
   );
 };
 
-// Returns the skill with the highest score
-export const getStrongestArea = () => {
-  return analyticsData.skills.reduce((strongest, current) =>
-    current.score > strongest.score ? current : strongest
+// Returns the topic with the highest avgScore
+export const getStrongestArea = (data) => {
+  return data.topicBreakdown.reduce((strongest, current) =>
+    current.avgScore > strongest.avgScore ? current : strongest
   );
 };

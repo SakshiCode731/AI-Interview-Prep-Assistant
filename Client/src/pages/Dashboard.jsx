@@ -17,22 +17,22 @@ const Dashboard = () => {
   const [selectedNotification, setSelectedNotification] = useState(null);
 
   const [notifications, setNotifications] = useState([
-    { 
+    {
       id: 1, icon: '🎯', title: 'Readiness score updated', desc: 'Your score improved to 70% this week', time: '2h ago', unread: true,
       fullDetail: 'Your interview readiness score has improved from 65% to 70% this week! This is based on your recent activity — completing 3 mock interviews, updating your resume, and improving your DSA skill score by 8%. Keep practicing to reach 80%+ readiness.',
       action: '/progress'
     },
-    { 
+    {
       id: 2, icon: '🏢', title: 'New drive announced', desc: 'Amazon campus drive scheduled next week', time: '5h ago', unread: true,
       fullDetail: 'Amazon has announced a campus recruitment drive scheduled for next week. The process includes an Online Assessment, 2 Technical Rounds, a Bar Raiser round, and an HR round. Required skills: DSA, System Design, Problem Solving, and Leadership Principles. Make sure your resume and readiness score are up to date before the drive.',
       action: '/companies'
     },
-    { 
+    {
       id: 3, icon: '❓', title: 'Practice reminder', desc: "You haven't practiced mock interview in 3 days", time: '1d ago', unread: false,
       fullDetail: "It's been 3 days since your last mock interview practice session. Regular practice helps build confidence and improves your answer quality. Consider doing at least one mock interview session today to stay on track with your preparation goals.",
       action: '/mock-interview'
     },
-    { 
+    {
       id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false,
       fullDetail: 'Your answer to "Reverse a linked list iteratively" was evaluated and scored 8/10. Strengths: Clear approach, correct time complexity explanation. Improvement area: Consider mentioning edge cases like empty list or single node scenarios in your answer.',
       action: '/answer-evaluator'
@@ -54,12 +54,12 @@ const Dashboard = () => {
     navigate('/');
   };
 
- const stats = [
-  { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400', path: '/readiness' },
-  { label: 'Questions practiced', value: '24', sub: '+3 today', subColor: 'text-green-400', path: '/progress' },
-  { label: 'Avg answer score', value: '7.8/10', sub: 'Good performance', subColor: 'text-yellow-400', path: '/answer-evaluator' },
-  { label: 'Companies saved', value: '5', sub: '2 upcoming drives', subColor: 'text-purple-400', path: '/bookmarks' },
-];
+  const stats = [
+    { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400', path: '/readiness' },
+    { label: 'Questions practiced', value: '24', sub: '+3 today', subColor: 'text-green-400', path: '/progress' },
+    { label: 'Avg answer score', value: '7.8/10', sub: 'Good performance', subColor: 'text-yellow-400', path: '/answer-evaluator' },
+    { label: 'Companies saved', value: '5', sub: '2 upcoming drives', subColor: 'text-purple-400', path: '/bookmarks' },
+  ];
 
   const skills = [
     { name: 'DSA', pct: 42, color: 'bg-red-500' },
@@ -341,17 +341,17 @@ const Dashboard = () => {
 
           {/* Stats Row */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {stats.map((s, i) => (
-  <div
-    key={i}
-    onClick={() => s.path && navigate(s.path)}
-    className="bg-gray-900 border border-gray-800 rounded-2xl p-4 cursor-pointer hover:border-purple-500 transition"
-  >
-    <p className="text-gray-400 text-xs mb-2">{s.label}</p>
-    <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
-    <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
-  </div>
-))}
+            {stats.map((s, i) => (
+              <div
+                key={i}
+                onClick={() => s.path && navigate(s.path)}
+                className="bg-gray-900 border border-gray-800 rounded-2xl p-4 cursor-pointer hover:border-purple-500 transition"
+              >
+                <p className="text-gray-400 text-xs mb-2">{s.label}</p>
+                <p className="text-2xl font-bold text-white mb-1">{s.value}</p>
+                <p className={`text-xs ${s.subColor}`}>{s.sub}</p>
+              </div>
+            ))}
           </div>
 
           {/* Skill Gap + Readiness Breakdown */}
