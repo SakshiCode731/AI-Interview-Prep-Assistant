@@ -1,4 +1,5 @@
 const Groq = require('groq-sdk');
+const Attempt = require('../models/Attempt');
 
 const evaluateAnswer = async (req, res) => {
   try {
@@ -63,6 +64,16 @@ Rules:
     const text = completion.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
     const response = JSON.parse(clean);
+
+    // 👇 NAYA: attempt DB mein save karo (real analytics ke liye)
+    await Attempt.create({
+      user: req.user._id,
+      type: 'answer-evaluator',
+      jobRole,
+      topic: req.body.topic || 'General',
+      question,
+      score: response.score
+    });
 
     res.status(200).json({
       message: 'Answer evaluated successfully',
