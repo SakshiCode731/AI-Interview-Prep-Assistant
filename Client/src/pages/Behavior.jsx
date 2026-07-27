@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
+// this page provides a guide on how to behave during interviews, including entry etiquette, communication tips, body language, and common mistakes to avoid.
+
 const sections = [
   {
     id: 'entry',
