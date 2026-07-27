@@ -11,6 +11,7 @@ const emptyCompany = {
   questions: [{ question: '', difficulty: 'Easy', round: '' }],
 };
 
+// admin dashboard page for managing companies
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [companies, setCompanies] = useState([]);
