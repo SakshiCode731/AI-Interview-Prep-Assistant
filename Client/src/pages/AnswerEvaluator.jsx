@@ -302,3 +302,5 @@ const AnswerEvaluator = () => {
 };
 
 export default AnswerEvaluator;
+
+// this page allows users to evaluate their interview answers by submitting a question, their answer, and the job role. The AI provides feedback, strengths, improvements, an ideal answer, and a detailed rubric breakdown including clarity score, STAR method adherence, keyword coverage, and confidence indicators.
