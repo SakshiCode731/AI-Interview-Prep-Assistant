@@ -1,4 +1,5 @@
 const Groq = require('groq-sdk');
+const Answer = require('../models/Answer');
 
 const getMockQuestions = async (req, res) => {
   try {
@@ -49,12 +50,13 @@ Respond in JSON format only, no extra text:
     res.status(500).json({ message: error.message });
   }
 };
+
 const evaluateAnswer = async (req, res) => {
   try {
-    const { jobRole, question, userAnswer } = req.body;
+    const { jobRole, question, category, userAnswer, sessionId } = req.body;
 
-    if (!question || !userAnswer) {
-      return res.status(400).json({ message: 'question and userAnswer are required' });
+    if (!question || !userAnswer || !sessionId) {
+      return res.status(400).json({ message: 'question, userAnswer, and sessionId are required' });
     }
 
     const client = new Groq({
@@ -84,11 +86,25 @@ Evaluate the answer on correctness, clarity, and completeness. Respond in JSON f
 
     const text = completion.choices[0].message.content;
     const clean = text.replace(/```json|```/g, '').trim();
-    const response = JSON.parse(clean);
+    const evaluation = JSON.parse(clean);
+
+    // Save this evaluated answer to the database, tied to the logged-in user
+    const savedAnswer = await Answer.create({
+      user: req.user._id,
+      sessionId,
+      jobRole: jobRole || '',
+      question,
+      category: category || 'Technical',
+      userAnswer,
+      score: evaluation.score,
+      feedback: evaluation.feedback,
+      strengths: evaluation.strengths,
+      improvement: evaluation.improvement
+    });
 
     res.status(200).json({
       message: 'Answer evaluated',
-      data: response
+      data: evaluation
     });
 
   } catch (error) {
@@ -97,4 +113,3 @@ Evaluate the answer on correctness, clarity, and completeness. Respond in JSON f
 };
 
 module.exports = { getMockQuestions, evaluateAnswer };
-
