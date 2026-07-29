@@ -10,6 +10,8 @@ const statusToColor = {
   weak: 'bg-red-500',
 };
 
+// Dashboard page: shows a snapshot of the user's readiness, progress, and bookmarks, along with navigation to other parts of the app.
+
 const Dashboard = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
