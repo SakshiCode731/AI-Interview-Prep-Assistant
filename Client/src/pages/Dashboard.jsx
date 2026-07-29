@@ -1,85 +1,129 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
+import API from '../services/api';
+
+const statusToColor = {
+  strong: 'bg-green-500',
+  average: 'bg-yellow-400',
+  weak: 'bg-red-500',
+};
 
 const Dashboard = () => {
   const { logout, user } = useAuth();
   const navigate = useNavigate();
-  const { toggleBookmark, isBookmarked } = useBookmarks();
-  const [dressingTab, setDressingTab] = useState('male');
+  const { bookmarks } = useBookmarks();
   const [showProfile, setShowProfile] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [showNotifications, setShowNotifications] = useState(false);
   const [activeNav, setActiveNav] = useState('Dashboard');
-  const [selectedNotification, setSelectedNotification] = useState(null);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: 1, icon: '🎯', title: 'Readiness score updated', desc: 'Your score improved to 70% this week', time: '2h ago', unread: true,
-      fullDetail: 'Your interview readiness score has improved from 65% to 70% this week! This is based on your recent activity — completing 3 mock interviews, updating your resume, and improving your DSA skill score by 8%. Keep practicing to reach 80%+ readiness.',
-      action: '/progress'
-    },
-    {
-      id: 2, icon: '🏢', title: 'New drive announced', desc: 'Amazon campus drive scheduled next week', time: '5h ago', unread: true,
-      fullDetail: 'Amazon has announced a campus recruitment drive scheduled for next week. The process includes an Online Assessment, 2 Technical Rounds, a Bar Raiser round, and an HR round. Required skills: DSA, System Design, Problem Solving, and Leadership Principles. Make sure your resume and readiness score are up to date before the drive.',
-      action: '/companies'
-    },
-    {
-      id: 3, icon: '❓', title: 'Practice reminder', desc: "You haven't practiced mock interview in 3 days", time: '1d ago', unread: false,
-      fullDetail: "It's been 3 days since your last mock interview practice session. Regular practice helps build confidence and improves your answer quality. Consider doing at least one mock interview session today to stay on track with your preparation goals.",
-      action: '/mock-interview'
-    },
-    {
-      id: 4, icon: '✅', title: 'Answer evaluated', desc: 'Your DSA answer scored 8/10', time: '2d ago', unread: false,
-      fullDetail: 'Your answer to "Reverse a linked list iteratively" was evaluated and scored 8/10. Strengths: Clear approach, correct time complexity explanation. Improvement area: Consider mentioning edge cases like empty list or single node scenarios in your answer.',
-      action: '/answer-evaluator'
-    },
-  ]);
+  const [progress, setProgress] = useState(null);
+  const [progressLoading, setProgressLoading] = useState(true);
 
-  const markAsRead = (id) => {
-    setNotifications(prev =>
-      prev.map(n => n.id === id ? { ...n, unread: false } : n)
-    );
-  };
+  const [readiness, setReadiness] = useState(null); // { analyzed, data }
+  const [readinessLoading, setReadinessLoading] = useState(true);
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-  };
+  useEffect(() => {
+    const fetchProgress = async () => {
+      try {
+        const res = await API.get('/progress');
+        setProgress(res.data);
+      } catch (err) {
+        setProgress(null);
+      } finally {
+        setProgressLoading(false);
+      }
+    };
+
+    const fetchReadiness = async () => {
+      try {
+        const res = await API.get('/readiness/me');
+        setReadiness(res.data);
+      } catch (err) {
+        setReadiness(null);
+      } finally {
+        setReadinessLoading(false);
+      }
+    };
+
+    fetchProgress();
+    fetchReadiness();
+  }, []);
+
+  // Notifications: no real notification system exists yet (would need a
+  // Notification model + endpoint triggered from mock interview / answer
+  // evaluator / readiness events). Kept empty rather than showing fake ones.
+  const notifications = [];
 
   const handleLogout = () => {
     logout();
     navigate('/');
   };
 
+  const questionsPracticed = progress ? progress.totalQuestionsAttempted : null;
+  const avgAnswerScore = progress ? `${progress.avgOverallScore}/10` : null;
+  const companiesSaved = bookmarks.length;
+  const readinessAnalyzed = readiness?.analyzed;
+  const readinessScore = readinessAnalyzed ? readiness.data.score : null;
+
   const stats = [
-    { label: 'Readiness score', value: '70%', sub: '+5% this week', subColor: 'text-green-400', path: '/readiness' },
-    { label: 'Questions practiced', value: '24', sub: '+3 today', subColor: 'text-green-400', path: '/progress' },
-    { label: 'Avg answer score', value: '7.8/10', sub: 'Good performance', subColor: 'text-yellow-400', path: '/answer-evaluator' },
-    { label: 'Companies saved', value: '5', sub: '2 upcoming drives', subColor: 'text-purple-400', path: '/bookmarks' },
+    {
+      label: 'Readiness score',
+      value: readinessLoading ? '...' : (readinessAnalyzed ? `${readinessScore}%` : '—'),
+      sub: readinessLoading ? '' : (readinessAnalyzed ? 'Based on your last resume analysis' : 'Analyze your resume to get started'),
+      subColor: 'text-purple-400',
+      path: '/readiness',
+    },
+    {
+      label: 'Questions practiced',
+      value: progressLoading ? '...' : (questionsPracticed ?? 0),
+      sub: progress && progress.totalQuestionsAttempted > 0 ? 'Keep it up' : 'Start practicing to see progress',
+      subColor: 'text-green-400',
+      path: '/progress',
+    },
+    {
+      label: 'Avg answer score',
+      value: progressLoading ? '...' : (avgAnswerScore ?? '—'),
+      sub: progress && progress.totalQuestionsAttempted > 0 ? 'From your recent attempts' : '',
+      subColor: 'text-yellow-400',
+      path: '/answer-evaluator',
+    },
+    {
+      label: 'Companies saved',
+      value: companiesSaved,
+      sub: companiesSaved > 0 ? `${companiesSaved} bookmarked` : 'No companies saved yet',
+      subColor: 'text-purple-400',
+      path: '/bookmarks',
+    },
   ];
 
-  const skills = [
-    { name: 'DSA', pct: 42, color: 'bg-red-500' },
-    { name: 'React', pct: 82, color: 'bg-green-500' },
-    { name: 'Node.js', pct: 76, color: 'bg-green-400' },
-    { name: 'System Design', pct: 28, color: 'bg-red-500' },
-    { name: 'SQL', pct: 58, color: 'bg-yellow-400' },
-    { name: 'Communication', pct: 70, color: 'bg-blue-400' },
-  ];
+  // Skill gap analysis is derived from the same topic breakdown used on the
+  // Progress Analytics page, so it reflects actual practice, not guesses.
+  const skills = (progress?.topicBreakdown || [])
+    .slice()
+    .sort((a, b) => b.avgScore - a.avgScore)
+    .map((t) => ({
+      name: t.topic,
+      pct: t.avgScore,
+      color: statusToColor[t.status] || 'bg-blue-400',
+    }));
 
-  const readinessBreakdown = [
-    { label: 'Skills match', pct: 75, color: 'bg-blue-400' },
-    { label: 'Experience', pct: 40, color: 'bg-yellow-400' },
-    { label: 'Projects', pct: 80, color: 'bg-green-400' },
-    { label: 'Resume quality', pct: 65, color: 'bg-blue-300' },
-  ];
+  const readinessBreakdown = readinessAnalyzed
+    ? [
+        { label: 'Skills match', pct: readiness.data.skillsMatch, color: 'bg-blue-400' },
+        { label: 'Experience', pct: readiness.data.experience, color: 'bg-yellow-400' },
+        { label: 'Projects', pct: readiness.data.projects, color: 'bg-green-400' },
+        { label: 'Resume quality', pct: readiness.data.resumeQuality, color: 'bg-blue-300' },
+      ]
+    : [];
 
   const navItems = [
     { section: 'OVERVIEW', items: [{ label: 'Dashboard', icon: '⊞', active: true }, { label: 'Progress tracker', icon: '📈', path: '/progress' }] },
     { section: 'PREPARATION', items: [{ label: 'Company prep', icon: '🏢', path: '/companies' }, { label: 'Resume upload', icon: '📄', path: '/resume' }, { label: 'Readiness score', icon: '🎯', path: '/readiness' }, { label: 'Skill gap analysis', icon: '📊', path: '/progress' }] },
-    { section: 'PRACTICE', items: [{ label: 'Mock interview', icon: '❓', path: '/mock-interview', badge: 5 }, { label: 'Answer evaluator', icon: '✅', path: '/answer-evaluator' }, { label: 'Coding round', icon: '💻', path: '/coding-round' }, { label: 'AI chatbot', icon: '🤖', path: '/chatbot' }] },
+    { section: 'PRACTICE', items: [{ label: 'Mock interview', icon: '❓', path: '/mock-interview' }, { label: 'Answer evaluator', icon: '✅', path: '/answer-evaluator' }, { label: 'Coding round', icon: '💻', path: '/coding-round' }, { label: 'AI chatbot', icon: '🤖', path: '/chatbot' }] },
     { section: 'GUIDES', items: [{ label: 'Dressing guide', icon: '👔', path: '/dressing-guide' }, { label: 'Confidence guide', icon: '🧘', path: '/confidence-guide' }, { label: 'Behavior guide', icon: '🤝', path: '/behavior-guide' }] },
     { section: 'ACCOUNT', items: [{ label: 'Bookmarks', icon: '🔖', path: '/bookmarks' }, { label: 'Settings', icon: '⚙️' }] },
   ];
@@ -164,56 +208,10 @@ const Dashboard = () => {
               <div className="absolute right-0 top-12 w-80 bg-gray-900 border border-gray-700 rounded-2xl shadow-2xl z-50 overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-700">
                   <p className="font-semibold text-white">Notifications</p>
-                  <span className="text-xs text-purple-400">
-                    {notifications.filter(n => n.unread).length} new
-                  </span>
                 </div>
-
-                <div className="max-h-96 overflow-y-auto">
-                  {notifications.map((n) => (
-                    <div
-                      key={n.id}
-                      onClick={() => {
-                        setSelectedNotification(n);
-                        setShowNotifications(false);
-                      }}
-                      className={`flex items-start gap-3 px-5 py-3 border-b border-gray-800 hover:bg-gray-800 transition cursor-pointer ${n.unread ? 'bg-gray-800/40' : ''}`}
-                    >
-                      <div className="w-9 h-9 rounded-lg bg-gray-700 flex items-center justify-center text-sm flex-shrink-0">
-                        {n.icon}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2">
-                          <p className="text-sm font-semibold text-white">{n.title}</p>
-                          {n.unread && <span className="w-1.5 h-1.5 bg-purple-500 rounded-full"></span>}
-                        </div>
-                        <p className="text-xs text-gray-400 mt-0.5">{n.desc}</p>
-                        <div className="flex items-center justify-between mt-1">
-                          <p className="text-xs text-gray-500">{n.time}</p>
-                          {n.unread && (
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                markAsRead(n.id);
-                              }}
-                              className="text-xs text-purple-400 hover:text-purple-300 transition"
-                            >
-                              Mark as read
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="p-3 border-t border-gray-700">
-                  <button
-                    onClick={markAllAsRead}
-                    className="w-full py-2 text-sm text-purple-400 hover:text-purple-300 transition"
-                  >
-                    Mark all as read
-                  </button>
+                <div className="px-5 py-8 text-center">
+                  <p className="text-gray-500 text-sm">No notifications yet</p>
+                  <p className="text-gray-600 text-xs mt-1">We'll let you know when there's something new</p>
                 </div>
               </div>
             )}
@@ -254,15 +252,15 @@ const Dashboard = () => {
 
                 <div className="grid grid-cols-3 border-b border-gray-700">
                   <div className="text-center py-3 border-r border-gray-700">
-                    <p className="text-white font-bold text-lg">70%</p>
+                    <p className="text-white font-bold text-lg">{readinessLoading ? '...' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
                     <p className="text-gray-400 text-xs">Readiness</p>
                   </div>
                   <div className="text-center py-3 border-r border-gray-700">
-                    <p className="text-white font-bold text-lg">24</p>
+                    <p className="text-white font-bold text-lg">{progressLoading ? '...' : (questionsPracticed ?? 0)}</p>
                     <p className="text-gray-400 text-xs">Practiced</p>
                   </div>
                   <div className="text-center py-3">
-                    <p className="text-white font-bold text-lg">5</p>
+                    <p className="text-white font-bold text-lg">{companiesSaved}</p>
                     <p className="text-gray-400 text-xs">Companies</p>
                   </div>
                 </div>
@@ -324,7 +322,6 @@ const Dashboard = () => {
                 >
                   <span>{item.icon}</span>
                   <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && <span className="bg-red-500 text-white text-xs px-1.5 rounded-full">{item.badge}</span>}
                 </button>
               ))}
             </div>
@@ -362,104 +359,82 @@ const Dashboard = () => {
                 <h3 className="font-semibold">🎯 Skill gap analysis</h3>
                 <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
               </div>
-              <div className="space-y-3">
-                {skills.map((s, i) => (
-                  <div key={i} className="flex items-center gap-3">
-                    <span className="text-gray-400 text-xs w-24 flex-shrink-0">{s.name}</span>
-                    <div className="flex-1 bg-gray-700 rounded-full h-2">
-                      <div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct}%` }}></div>
+              {progressLoading ? (
+                <p className="text-gray-500 text-sm">Loading...</p>
+              ) : skills.length === 0 ? (
+                <div className="py-6 text-center">
+                  <p className="text-gray-400 text-sm">No practice data yet</p>
+                  <p className="text-gray-600 text-xs mt-1">Attempt a mock interview or answer evaluator question to see your skill breakdown</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {skills.map((s, i) => (
+                    <div key={i} className="flex items-center gap-3">
+                      <span className="text-gray-400 text-xs w-24 flex-shrink-0">{s.name}</span>
+                      <div className="flex-1 bg-gray-700 rounded-full h-2">
+                        <div className={`${s.color} h-2 rounded-full`} style={{ width: `${s.pct}%` }}></div>
+                      </div>
+                      <span className="text-gray-400 text-xs w-8 text-right">{s.pct}%</span>
                     </div>
-                    <span className="text-gray-400 text-xs w-8 text-right">{s.pct}%</span>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
 
             {/* Readiness Breakdown */}
             <div className="bg-gray-900 border border-gray-800 rounded-2xl p-5">
               <div className="flex justify-between items-center mb-4">
                 <h3 className="font-semibold">🎯 Readiness breakdown</h3>
-                <button onClick={() => navigate('/progress')} className="text-blue-400 text-xs hover:underline">View full report</button>
+                <button onClick={() => navigate('/readiness')} className="text-blue-400 text-xs hover:underline">
+                  {readinessAnalyzed ? 'Re-analyze' : 'Analyze resume'}
+                </button>
               </div>
-              <div className="flex justify-center mb-4">
-                <div className="relative w-24 h-24">
-                  <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1f2937" strokeWidth="3" />
-                    <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3b82f6" strokeWidth="3"
-                      strokeDasharray="70 30" strokeLinecap="round" />
-                  </svg>
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <span className="text-xl font-bold">70</span>
-                    <span className="text-xs text-gray-400">/100</span>
-                  </div>
+
+              {readinessLoading ? (
+                <p className="text-gray-500 text-sm">Loading...</p>
+              ) : !readinessAnalyzed ? (
+                <div className="py-6 text-center">
+                  <p className="text-gray-400 text-sm">You haven't analyzed your resume yet</p>
+                  <button
+                    onClick={() => navigate('/readiness')}
+                    className="mt-3 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold rounded-xl transition"
+                  >
+                    Get your readiness score
+                  </button>
                 </div>
-              </div>
-              <div className="space-y-2">
-                {readinessBreakdown.map((r, i) => (
-                  <div key={i} className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${r.color}`}></div>
-                      <span className="text-gray-400 text-xs">{r.label}</span>
+              ) : (
+                <>
+                  <div className="flex justify-center mb-4">
+                    <div className="relative w-24 h-24">
+                      <svg viewBox="0 0 36 36" className="w-24 h-24 -rotate-90">
+                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#1f2937" strokeWidth="3" />
+                        <circle cx="18" cy="18" r="15.9" fill="none" stroke="#3b82f6" strokeWidth="3"
+                          strokeDasharray={`${readinessScore} ${100 - readinessScore}`} strokeLinecap="round" />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-xl font-bold">{readinessScore}</span>
+                        <span className="text-xs text-gray-400">/100</span>
+                      </div>
                     </div>
-                    <span className="text-white text-xs">{r.pct}%</span>
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-2">
+                    {readinessBreakdown.map((r, i) => (
+                      <div key={i} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${r.color}`}></div>
+                          <span className="text-gray-400 text-xs">{r.label}</span>
+                        </div>
+                        <span className="text-white text-xs">{r.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
           </div>
         </main>
       </div>
-
-      {/* Notification Detail Modal */}
-      {selectedNotification && (
-        <div className="fixed inset-0 bg-black/70 z-[60] flex items-center justify-center p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-md shadow-2xl">
-
-            {/* Header */}
-            <div className="flex items-start gap-4 p-6 border-b border-gray-800">
-              <div className="w-12 h-12 rounded-xl bg-gray-800 flex items-center justify-center text-2xl flex-shrink-0">
-                {selectedNotification.icon}
-              </div>
-              <div className="flex-1">
-                <h3 className="font-semibold text-white text-lg">{selectedNotification.title}</h3>
-                <p className="text-gray-500 text-xs mt-1">{selectedNotification.time}</p>
-              </div>
-              <button
-                onClick={() => setSelectedNotification(null)}
-                className="text-gray-400 hover:text-white text-xl leading-none"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Body */}
-            <div className="p-6">
-              <p className="text-gray-300 text-sm leading-relaxed">{selectedNotification.fullDetail}</p>
-            </div>
-
-            {/* Footer */}
-            <div className="flex gap-3 p-6 pt-0">
-              <button
-                onClick={() => setSelectedNotification(null)}
-                className="flex-1 py-2.5 border border-gray-700 text-gray-300 hover:text-white rounded-xl text-sm font-medium transition"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => {
-                  navigate(selectedNotification.action);
-                  setSelectedNotification(null);
-                }}
-                className="flex-1 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold transition"
-              >
-                View Details →
-              </button>
-            </div>
-
-          </div>
-        </div>
-      )}
 
     </div>
   );

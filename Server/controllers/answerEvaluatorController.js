@@ -1,5 +1,6 @@
 const Groq = require('groq-sdk');
-const Attempt = require('../models/Attempt');
+const Answer = require('../models/Answer');
+const crypto = require('crypto');
 
 const evaluateAnswer = async (req, res) => {
   try {
@@ -65,14 +66,19 @@ Rules:
     const clean = text.replace(/```json|```/g, '').trim();
     const response = JSON.parse(clean);
 
-    // 👇 NAYA: attempt DB mein save karo (real analytics ke liye)
-    await Attempt.create({
+    // Save into the SAME Answer model used by Mock Interview,
+    // so all practice data is unified for progress analytics
+    await Answer.create({
       user: req.user._id,
-      type: 'answer-evaluator',
+      sessionId: `answer-eval-${crypto.randomUUID()}`, // standalone submission, own session
       jobRole,
-      topic: req.body.topic || 'General',
       question,
-      score: response.score
+      category: req.body.topic || 'Technical',
+      userAnswer,
+      score: response.score,
+      feedback: response.feedback,
+      strengths: Array.isArray(response.strengths) ? response.strengths.join('; ') : (response.strengths || ''),
+      improvement: Array.isArray(response.improvements) ? response.improvements.join('; ') : (response.improvements || '')
     });
 
     res.status(200).json({
