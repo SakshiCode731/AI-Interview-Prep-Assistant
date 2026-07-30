@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getProgress } = require('../controllers/progressController');
 const { protect } = require('../middleware/authMiddleware');
+// @desc Get user progress
 
 router.get('/', protect, getProgress);
 
