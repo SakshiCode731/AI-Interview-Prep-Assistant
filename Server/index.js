@@ -11,7 +11,7 @@ const mockInterviewRoutes = require('./routes/mockInterviewRoutes');
 const answerEvaluatorRoutes = require('./routes/answerEvaluatorRoutes');
 const chatRoutes = require('./routes/chatRoutes');
 
-
+// Connect to the database
 connectDB();
 
 const app = express();
