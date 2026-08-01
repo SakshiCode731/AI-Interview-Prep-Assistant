@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '../services/api';
 
 const statusColor = {
   strong: { bar: 'bg-green-500', text: 'text-green-400', badge: 'bg-green-900/40 text-green-400' },
@@ -13,32 +14,20 @@ export default function ProgressAnalytics() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const fetchProgress = async () => {
-      try {
-        const token = localStorage.getItem('token');
-        const res = await fetch('/api/progress', {
-          headers: {
-            'Content-Type': 'application/json',
-            ...(token && { Authorization: `Bearer ${token}` }),
-          },
-        });
+ useEffect(() => {
+  const fetchProgress = async () => {
+    try {
+      const res = await API.get('/progress');
+      setProgress(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to load progress data');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-        if (!res.ok) {
-          throw new Error('Failed to load progress data');
-        }
-
-        const data = await res.json();
-        setProgress(data);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchProgress();
-  }, []);
+  fetchProgress();
+}, []);
 
   if (loading) {
     return (
