@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import API from '../services/api';
+import { useBookmarks } from '../context/BookmarkContext';
 
 import aiLogo from '../assets/ai-logo.png';
 
@@ -11,6 +12,7 @@ const CompanyPrep = () => {
   const [selected, setSelected] = useState(null);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { toggleBookmark, isBookmarked } = useBookmarks();
 
 
   const fetchCompanies = async (keyword = '') => {
@@ -100,9 +102,25 @@ const CompanyPrep = () => {
               >
                 <div className="flex justify-between items-start mb-2">
                   <h4 className="font-semibold text-white">{company.name}</h4>
-                  <span className={`text-xs px-2 py-1 rounded-full border ${difficultyColor(company.difficulty)}`}>
-                    {company.difficulty}
-                  </span>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleBookmark({
+                          id: `c-${company._id}`,
+                          type: 'Company',
+                          text: company.name,
+                          meta: `${company.rounds.length} rounds · ${company.requiredSkills.slice(0, 2).join(', ')}`,
+                        });
+                      }}
+                      className="text-gray-500 hover:text-yellow-400 transition"
+                    >
+                      {isBookmarked(`c-${company._id}`) ? '⭐' : '☆'}
+                    </button>
+                    <span className={`text-xs px-2 py-1 rounded-full border ${difficultyColor(company.difficulty)}`}>
+                      {company.difficulty}
+                    </span>
+                  </div>
                 </div>
                 <p className="text-gray-400 text-sm mb-3 line-clamp-2">{company.description}</p>
                 <div className="flex flex-wrap gap-1">
@@ -134,9 +152,22 @@ const CompanyPrep = () => {
                 <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
                   <div className="flex justify-between items-start mb-3">
                     <h3 className="text-2xl font-bold">{selected.name}</h3>
-                    <span className={`text-sm px-3 py-1 rounded-full border ${difficultyColor(selected.difficulty)}`}>
-                      {selected.difficulty}
-                    </span>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => toggleBookmark({
+                          id: `c-${selected._id}`,
+                          type: 'Company',
+                          text: selected.name,
+                          meta: `${selected.rounds.length} rounds · ${selected.requiredSkills.slice(0, 2).join(', ')}`,
+                        })}
+                        className="text-gray-500 hover:text-yellow-400 transition text-xl"
+                      >
+                        {isBookmarked(`c-${selected._id}`) ? '⭐' : '☆'}
+                      </button>
+                      <span className={`text-sm px-3 py-1 rounded-full border ${difficultyColor(selected.difficulty)}`}>
+                        {selected.difficulty}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-gray-400 mb-5">{selected.description}</p>
 
