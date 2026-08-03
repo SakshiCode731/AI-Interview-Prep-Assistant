@@ -18,13 +18,13 @@ const Chatbot = () => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
- const formatMessage = (text) => {
-  return text
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/^\* /gm, '• ')
-    .replace(/^\s{2}\* /gm, '  · ')
-    .replace(/\*(?!\*)/g, '');  // remaining single * remove karo
-};
+  const formatMessage = (text) => {
+    return text
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/^\* /gm, '• ')
+      .replace(/^\s{2}\* /gm, '  · ')
+      .replace(/\*(?!\*)/g, '');  // remaining single * remove karo
+  };
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
@@ -39,7 +39,12 @@ const Chatbot = () => {
         message: input,
         history: messages
       });
-      setMessages(prev => [...prev, { role: 'assistant', content: res.data.reply }]);
+      setMessages(prev => [...prev, {
+        role: 'assistant',
+        content: res.data.reply,
+        grounded: res.data.grounded,
+        groundedCompany: res.data.groundedCompany,
+      }]);
     } catch (err) {
       setMessages(prev => [...prev, {
         role: 'assistant',
@@ -108,12 +113,16 @@ const Chatbot = () => {
                 </div>
               )}
               <div
-                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${
-                  msg.role === 'user'
+                className={`max-w-[75%] px-4 py-3 rounded-2xl text-sm leading-relaxed ${msg.role === 'user'
                     ? 'bg-purple-600 text-white rounded-br-sm'
                     : 'bg-gray-800 text-gray-200 rounded-bl-sm'
-                }`}
+                  }`}
               >
+                {msg.role === 'assistant' && msg.grounded && (
+                  <div className="mb-2 inline-flex items-center gap-1.5 bg-green-900/30 border border-green-800 text-green-400 text-xs px-2.5 py-1 rounded-full">
+                    📊 Based on real {msg.groundedCompany} interview data
+                  </div>
+                )}
                 {msg.role === 'assistant' ? (
                   <span dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} />
                 ) : (
