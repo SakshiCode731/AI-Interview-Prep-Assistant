@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
+// this is the main chatbot page where users can interact with the AI assistant. It maintains the chat history, handles user input, and displays messages from both the user and the assistant. The assistant can provide grounded responses based on real interview data when available.
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
