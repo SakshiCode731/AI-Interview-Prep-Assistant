@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
+// the readiness score page allows users to input their resume text and the job role they are applying for. It sends this data to the backend to get an AI-powered readiness score, along with strengths and areas for improvement. The results are displayed in a user-friendly format.
+
 const ReadinessScore = () => {
   const [resumeText, setResumeText] = useState('');
   const [jobRole, setJobRole] = useState('');
