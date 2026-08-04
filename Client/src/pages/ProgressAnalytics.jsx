@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 
+// this page provides users with a comprehensive overview of their interview preparation progress. It fetches data from the backend, including total questions attempted, mock interviews completed, average scores, and topic-wise breakdowns. The page highlights the user's strongest and weakest areas, offering actionable insights for improvement.
+
 const statusColor = {
   strong: { bar: 'bg-green-500', text: 'text-green-400', badge: 'bg-green-900/40 text-green-400' },
   average: { bar: 'bg-yellow-400', text: 'text-yellow-400', badge: 'bg-yellow-900/40 text-yellow-400' },
