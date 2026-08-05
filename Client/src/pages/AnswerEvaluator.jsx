@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import API from '../services/api';
 import useSpeechToText from '../hooks/useSpeechToText';
 
+// this page allows users to evaluate their interview answers by submitting a question, their answer, and the job role. The AI provides feedback, strengths, improvements, an ideal answer, and a detailed rubric breakdown including clarity score, STAR method adherence, keyword coverage, and confidence indicators.
+
 const AnswerEvaluator = () => {
   const { isListening, transcript, error: voiceError, isSupported, startListening, stopListening, resetTranscript } = useSpeechToText();
   const [question, setQuestion] = useState('');
