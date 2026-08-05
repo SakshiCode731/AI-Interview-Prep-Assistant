@@ -11,6 +11,9 @@ export const codingProblems = [
       { input: "a", expected: "a" }
     ]
   },
+
+// the rest of the coding problems follow the same structure as above, each with a unique id, title, difficulty level, description, starter code, and test cases.
+
   {
     id: 2,
     title: "Find Maximum in Array",
