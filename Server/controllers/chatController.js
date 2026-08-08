@@ -1,6 +1,8 @@
 const Groq = require('groq-sdk');
 const Company = require('../models/Company');
 
+// there is adding some code for the chat controller to handle the chat functionality with RAG (Retrieval-Augmented Generation) approach. The code includes a function to retrieve company context based on user messages and a function to send messages to the AI model, incorporating the retrieved context into the system prompt.
+
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 // Retrieval function — user ke message mein company ka naam dhundo aur uska real data DB se lao
