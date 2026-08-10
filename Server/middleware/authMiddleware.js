@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user'); 
 
 // this is automiddlware page
+// the protect middleware checks for a valid JWT token in the request headers. If the token is valid, it decodes the token to retrieve the user ID and fetches the user from the database, attaching the user object to the request. If the token is missing or invalid, it responds with an unauthorized error. The adminOnly middleware checks if the authenticated user has an admin role, allowing access only to admin users.
 
 const protect = async (req, res, next) => {
   let token;
