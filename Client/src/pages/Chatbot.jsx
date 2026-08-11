@@ -20,12 +20,22 @@ const Chatbot = () => {
   }, [messages]);
 
   const formatMessage = (text) => {
-    return text
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/^\* /gm, '• ')
-      .replace(/^\s{2}\* /gm, '  · ')
-      .replace(/\*(?!\*)/g, '');  // remaining single * remove karo
-  };
+  return text
+    // "**Heading:**" pattern ke baad line break add karo, taaki heading apni line pe rahe
+    .replace(/\*\*(.*?):\*\*\s*/g, '<br/><strong>$1:</strong><br/>')
+    // baaki normal bold text (jo heading pattern nahi hai)
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    // bullet points (* item) ko naye line pe le jao
+    .replace(/\s*\*\s+/g, '<br/>• ')
+    // remaining single * hatao (agar koi bach gaya ho)
+    .replace(/\*(?!\*)/g, '')
+    // AI ke response mein jo actual \n (newline) hain unhe <br/> mein convert karo
+    .replace(/\n/g, '<br/>')
+    // agar 3+ consecutive <br/> ban jayein (double spacing), unhe 2 tak limit karo
+    .replace(/(<br\/>\s*){3,}/g, '<br/><br/>')
+    // shuru mein agar extra <br/> aa jaye to hata do
+    .replace(/^(<br\/>)+/, '');
+};
 
   const sendMessage = async () => {
     if (!input.trim() || loading) return;
