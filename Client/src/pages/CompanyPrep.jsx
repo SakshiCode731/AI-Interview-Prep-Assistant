@@ -254,3 +254,4 @@ const CompanyPrep = () => {
 };
 
 export default CompanyPrep;
+// this page is for company-specific preparation. It fetches a list of companies from the backend and allows users to search and select a company. Upon selection, it displays detailed information about the company, including its description, required skills, interview rounds, and previous interview questions. Users can also start a company-specific mock interview directly from this page. The page includes features like bookmarking companies and debounced search functionality for better performance.
