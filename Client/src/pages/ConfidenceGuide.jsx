@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom';
+// this page provides users with a comprehensive guide to building confidence and staying calm during interviews. It includes practical tips, exercises, and strategies to help users manage anxiety, improve body language, and enter interviews with a positive mindset. The guide is structured in an easy-to-follow format, allowing users to quickly access the advice they need before their interviews.
 
 const tips = [
   {
