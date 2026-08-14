@@ -28,7 +28,7 @@ Respond in JSON format only, no extra text:
     {
       "id": 1,
       "question": "<question text>",
-      "category": "<DSA/System Design/HR/Technical>",
+      "category": "<classify into exactly one of: DSA, System Design, HR, Behavioral, Frontend, Backend, Database, OOP, General — pick the MOST SPECIFIC one that fits, use General only if truly nothing else fits>",
       "hint": "<small hint>"
     }
   ]
@@ -75,6 +75,7 @@ Candidate's Answer: "${userAnswer}"
 
 Evaluate the answer on correctness, clarity, and completeness. Respond in JSON format only, no extra text:
 {
+  "topic": "<classify the QUESTION into exactly one of: DSA, System Design, HR, Behavioral, Frontend, Backend, Database, OOP, General>",
   "score": <number from 0 to 10>,
   "feedback": "<2-3 sentences of constructive feedback>",
   "strengths": "<what was good about the answer, 1 short sentence>",
@@ -88,13 +89,21 @@ Evaluate the answer on correctness, clarity, and completeness. Respond in JSON f
     const clean = text.replace(/```json|```/g, '').trim();
     const evaluation = JSON.parse(clean);
 
+    // Fresh per-answer classification (evaluation.topic) ko priority do —
+    // ye hamesha up-to-date hota hai. Frontend ka category sirf fallback,
+    // aur agar wo bhi generic 'Technical' nikla to use ignore karke evaluation.topic use karo.
+    const isGenericFallback = !category || category === 'Technical';
+    const finalTopic = isGenericFallback
+      ? (evaluation.topic || 'General')
+      : category;
+
     // Save this evaluated answer to the database, tied to the logged-in user
     const savedAnswer = await Answer.create({
       user: req.user._id,
       sessionId,
       jobRole: jobRole || '',
       question,
-      category: category || 'Technical',
+      category: finalTopic,
       userAnswer,
       score: evaluation.score,
       feedback: evaluation.feedback,
