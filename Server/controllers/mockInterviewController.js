@@ -1,5 +1,6 @@
 const Groq = require('groq-sdk');
 const Answer = require('../models/Answer');
+// this controller handles mock interview question generation and answer evaluation
 
 const getMockQuestions = async (req, res) => {
   try {
