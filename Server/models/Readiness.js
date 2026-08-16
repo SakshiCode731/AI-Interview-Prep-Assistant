@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+// this is the schema for the Readiness model, which stores the readiness score and related information for a user in a specific job role.
 
 const readinessSchema = new mongoose.Schema(
   {
