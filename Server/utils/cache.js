@@ -5,3 +5,4 @@ const NodeCache = require('node-cache');
 const cache = new NodeCache({ stdTTL: 3600, checkperiod: 120 });
 
 module.exports = cache;
+// this cache module is used to store and retrieve data in memory for faster access, reducing the need for repeated database queries. It is particularly useful for caching company data, which does not change frequently.
