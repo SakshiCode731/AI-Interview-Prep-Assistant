@@ -8,6 +8,7 @@ import ResumeUpload from './pages/ResumeUpload';
 import ReadinessScore from './pages/ReadinessScore';
 import MockInterview from './pages/MockInterview';
 import AnswerEvaluator from './pages/AnswerEvaluator';
+import SystemDesignPractice from './pages/SystemDesignPractice';
 import CompanyPrep from './pages/CompanyPrep';
 import Chatbot from './pages/Chatbot';
 import DressingGuide from './pages/DressingGuide';
@@ -54,6 +55,9 @@ const App = () => {
       } />
       <Route path="/answer-evaluator" element={
         <ProtectedRoute><AnswerEvaluator /></ProtectedRoute>
+      } />
+      <Route path="/system-design" element={
+        <ProtectedRoute><SystemDesignPractice /></ProtectedRoute>
       } />
       <Route path="/companies" element={
         <ProtectedRoute><CompanyPrep /></ProtectedRoute>
