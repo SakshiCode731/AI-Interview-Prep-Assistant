@@ -19,6 +19,7 @@ const readinessRoutes = require('./routes/readinessRoutes');
 const mockInterviewRoutes = require('./routes/mockInterviewRoutes');
 const answerEvaluatorRoutes = require('./routes/answerEvaluatorRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const systemDesignRoutes = require('./routes/systemDesignRoutes');
 
 connectDB();
 
@@ -37,13 +38,12 @@ app.use('/api/answer', answerEvaluatorRoutes);
 app.use('/api/progress', require('./routes/progressRoutes'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', require('./routes/adminRoutes'));
+app.use('/api/system-design', systemDesignRoutes);
 
 app.get('/', (req, res) => {
   res.send('API is running...');
 });
-// app.get('/', (req, res) => {
-//   throw new Error('Test Sentry integration - root route');
-// });
+
 Sentry.setupExpressErrorHandler(app);
 
 const PORT = process.env.PORT || 5000;
