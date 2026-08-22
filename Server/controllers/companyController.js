@@ -4,6 +4,8 @@ const cache = require('../utils/cache');
 // GET /api/companies — sab companies (search ke saath)
 const getCompanies = async (req, res) => {
   try {
+    throw new Error('Test Sentry integration'); // ← TEMPORARY test line, test hone ke baad hata dena
+
     const searchKeyword = req.query.search || '';
     const cacheKey = `companies:list:${searchKeyword}`;
 
@@ -55,7 +57,7 @@ const getCompanyById = async (req, res) => {
 const createCompany = async (req, res) => {
   try {
     const company = await Company.create(req.body);
-    cache.flushAll(); // naya data aaya, purana cache invalid ho gaya
+    cache.flushAll();
     res.status(201).json(company);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -71,7 +73,7 @@ const updateCompany = async (req, res) => {
     });
     if (!company) return res.status(404).json({ message: 'Company not found' });
 
-    cache.flushAll(); // stale list/detail cache clear karo
+    cache.flushAll();
     res.status(200).json(company);
   } catch (error) {
     res.status(500).json({ message: error.message });
