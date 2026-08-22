@@ -1,4 +1,5 @@
 const multer = require('multer');
+const Sentry = require('@sentry/node');
 
 const storage = multer.memoryStorage();
 
@@ -22,6 +23,7 @@ const uploadResume = async (req, res) => {
       text: data.text
     });
   } catch (error) {
+    Sentry.captureException(error);
     res.status(500).json({ message: error.message });
   }
 };

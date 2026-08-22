@@ -1,4 +1,5 @@
 const Answer = require('../models/Answer');
+const Sentry = require('@sentry/node');
 
 // @desc   Get aggregated progress/analytics for the logged-in user
 // @route  GET /api/progress
@@ -26,7 +27,6 @@ const getProgress = async (req, res) => {
       allAnswers.reduce((sum, a) => sum + a.score, 0) / totalQuestionsAttempted
     ).toFixed(1);
 
-    // Group by category/topic
     const categoryMap = {};
     allAnswers.forEach((a) => {
       const cat = a.category || 'Technical';
@@ -39,7 +39,7 @@ const getProgress = async (req, res) => {
 
     const topicBreakdown = Object.keys(categoryMap).map((topic) => {
       const { totalScore, count } = categoryMap[topic];
-      const avgScore = Math.round((totalScore / count) * 10); // convert 0-10 avg to percentage
+      const avgScore = Math.round((totalScore / count) * 10);
       let status = 'average';
       if (avgScore >= 70) status = 'strong';
       else if (avgScore < 40) status = 'weak';
@@ -60,6 +60,7 @@ const getProgress = async (req, res) => {
     });
 
   } catch (error) {
+    Sentry.captureException(error);
     res.status(500).json({ message: error.message });
   }
 };

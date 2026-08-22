@@ -1,6 +1,7 @@
 const Groq = require('groq-sdk');
 const Answer = require('../models/Answer');
 const crypto = require('crypto');
+const Sentry = require('@sentry/node');
 
 const evaluateAnswer = async (req, res) => {
   try {
@@ -26,7 +27,6 @@ Candidate's Answer: ${userAnswer}
 
 Evaluate this answer using the rubric below and respond in JSON format only, no extra text, no markdown, no backticks:
 {
-  "topic": "<classify the QUESTION into exactly one of: DSA, System Design, HR, Behavioral, Frontend, Backend, Database, OOP, General>",
   "score": <number out of 10, overall quality>,
   "verdict": "<Excellent/Good/Average/Poor>",
   "feedback": "<overall feedback in 2-3 lines>",
@@ -55,7 +55,6 @@ Evaluate this answer using the rubric below and respond in JSON format only, no 
 }
 
 Rules:
-- topic must be based on what the QUESTION is actually testing (e.g. a question about arrays/trees/complexity = "DSA", a question about scaling/load balancing = "System Design", a question about teamwork/conflict = "HR" or "Behavioral", a question about React/CSS/UI = "Frontend", a question about APIs/servers = "Backend", a question about SQL/indexing = "Database", a question about inheritance/polymorphism = "OOP"). Use "General" only if nothing else fits.
 - Be honest and calibrated — a 2-word or vague answer should score low (1-3), a thorough well-structured answer should score high (7-10).
 - For starAdherence.applicable: set to false for pure DSA/coding/theory/technical trivia questions. Set to true for behavioral, HR, project-explanation, or "tell me about a time" questions.
 - keywordCoverage should reflect real technical terms relevant to the specific question, not generic filler words.
@@ -68,17 +67,12 @@ Rules:
     const clean = text.replace(/```json|```/g, '').trim();
     const response = JSON.parse(clean);
 
-    // Topic ab Groq khud detect karta hai question padh ke — request body pe depend nahi karta
-    const detectedTopic = response.topic || 'General';
-
-    // Save into the SAME Answer model used by Mock Interview,
-    // so all practice data is unified for progress analytics
     await Answer.create({
       user: req.user._id,
-      sessionId: `answer-eval-${crypto.randomUUID()}`, // standalone submission, own session
+      sessionId: `answer-eval-${crypto.randomUUID()}`,
       jobRole,
       question,
-      category: detectedTopic,
+      category: req.body.topic || 'Technical',
       userAnswer,
       score: response.score,
       feedback: response.feedback,
@@ -92,6 +86,7 @@ Rules:
     });
 
   } catch (error) {
+    Sentry.captureException(error);
     res.status(500).json({ message: error.message });
   }
 };

@@ -1,6 +1,7 @@
 const User = require('../models/user');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const Sentry = require('@sentry/node'); // file ke upar import karo
 
 // @desc   Register new user
 // @route  POST /api/auth/signup
@@ -42,12 +43,14 @@ const signupUser = async (req, res) => {
     });
 
   } catch (error) {
+    Sentry.captureException(error);
     res.status(500).json({ message: error.message });
   }
 };
 
 // @desc   Login user
 // @route  POST /api/auth/login
+
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -81,6 +84,7 @@ const loginUser = async (req, res) => {
     });
 
   } catch (error) {
+    Sentry.captureException(error);
     res.status(500).json({ message: error.message });
   }
 };

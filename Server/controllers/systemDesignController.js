@@ -1,5 +1,6 @@
 const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const Sentry = require('@sentry/node');
 
 // Curated system design questions — hardcoded hai kyunki fixed set hai, DB ki zarurat nahi
 const systemDesignQuestions = [
@@ -71,6 +72,7 @@ Rules:
 
     res.status(200).json({ message: 'Design evaluated successfully', data: response });
   } catch (error) {
+    Sentry.captureException(error);
     res.status(500).json({ message: error.message });
   }
 };
