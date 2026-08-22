@@ -28,7 +28,7 @@ app.use('/api/answer', answerEvaluatorRoutes);
 app.use('/api/progress', require('./routes/progressRoutes'));
 app.use('/api/chat', chatRoutes);
 app.use('/api/admin', require('./routes/adminRoutes'));
-
+app.use('/api/system-design', require('./routes/systemDesignRoutes'));
 
 app.get('/', (req, res) => {
   res.send('API is running...');
