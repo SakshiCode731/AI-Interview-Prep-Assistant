@@ -1,6 +1,7 @@
 const Groq = require('groq-sdk');
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const Sentry = require('@sentry/node');
+const { GROQ_MODEL } = require('../config/groqConfig');
 
 // Curated system design questions — hardcoded hai kyunki fixed set hai, DB ki zarurat nahi
 const systemDesignQuestions = [
@@ -27,7 +28,7 @@ const evaluateDesign = async (req, res) => {
     }
 
     const completion = await groq.chat.completions.create({
-      model: 'openai/gpt-oss-120b',
+      model: GROQ_MODEL,
       messages: [
         {
           role: 'user',

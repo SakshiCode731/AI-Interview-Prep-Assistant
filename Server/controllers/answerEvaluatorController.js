@@ -2,6 +2,7 @@ const Groq = require('groq-sdk');
 const Answer = require('../models/Answer');
 const crypto = require('crypto');
 const Sentry = require('@sentry/node');
+const { GROQ_MODEL } = require('../config/groqConfig');
 
 const evaluateAnswer = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ const evaluateAnswer = async (req, res) => {
     });
 
     const completion = await client.chat.completions.create({
-      model: 'openai/gpt-oss-120b',
+      model: GROQ_MODEL,
       messages: [
         {
           role: 'user',

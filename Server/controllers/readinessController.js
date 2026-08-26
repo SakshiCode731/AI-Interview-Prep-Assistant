@@ -1,6 +1,7 @@
 const Groq = require('groq-sdk');
 const Sentry = require('@sentry/node');
 const Readiness = require('../models/Readiness');
+const { GROQ_MODEL } = require('../config/groqConfig');
 
 const getReadinessScore = async (req, res) => {
   try {
@@ -13,7 +14,7 @@ const getReadinessScore = async (req, res) => {
     const client = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
     const completion = await client.chat.completions.create({
-      model: 'openai/gpt-oss-120b',
+      model: GROQ_MODEL,
       messages: [
         {
           role: 'user',

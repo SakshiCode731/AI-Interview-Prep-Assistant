@@ -1,6 +1,7 @@
 const Groq = require('groq-sdk');
 const Company = require('../models/Company');
 const Sentry = require('@sentry/node');
+const { GROQ_MODEL } = require('../config/groqConfig');
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
@@ -56,7 +57,7 @@ Base your answer strictly on this verified data. If asked something not covered 
     }));
 
     const completion = await groq.chat.completions.create({
-      model: 'openai/gpt-oss-120b',
+      model: GROQ_MODEL,
       messages: [
         { role: 'system', content: systemPrompt },
         ...formattedHistory,
