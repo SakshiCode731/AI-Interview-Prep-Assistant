@@ -13,14 +13,19 @@ router.post('/evaluate', protect, aiLimiter, validate(mockInterviewEvaluateSchem
 // agent route
 router.post('/agent/chat', protect, aiLimiter, async (req, res) => {
   try {
-    const { message } = req.body;
+    const { message, sessionId } = req.body;
 
     if (!message) {
       return res.status(400).json({ error: 'message field required' });
     }
 
-    const reply = await runAgent(message);
-    res.json({ reply });
+    const result = await runAgent({
+      userId: req.user._id,
+      sessionId: sessionId || null,
+      userMessage: message,
+    });
+
+    res.json(result); // { reply, sessionId }
   } catch (err) {
     console.error('Agent error:', err);
     res.status(500).json({ error: 'Something went wrong', details: err.message });

@@ -20,6 +20,7 @@ import CompanyMockInterview from './pages/CompanyMockInterview';
 import CodingRound from "./pages/CodingRound";
 import ProgressAnalytics from './pages/ProgressAnalytics';
 import AdminDashboard from './pages/AdminDashboard';
+import AgentChat from './pages/AgentChat';
 
 const ProtectedRoute = ({ children }) => {
   const { token } = useAuth();
@@ -85,6 +86,9 @@ const App = () => {
       } />
       <Route path="/coding-round" element={
         <ProtectedRoute><CodingRound /></ProtectedRoute>
+      } />
+      <Route path="/agent-chat" element={
+        <ProtectedRoute><AgentChat /></ProtectedRoute>
       } />
       {user?.role === 'admin' && (
         <Route path="/admin" element={

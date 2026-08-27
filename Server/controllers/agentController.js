@@ -39,8 +39,8 @@ async function evaluateAnswer({ jobRole, question, userAnswer }) {
 const availableFunctions = { generateQuestions, evaluateAnswer };
 
 // --- Agent runner (DB-backed conversation history ke saath) ---
+
 async function runAgent({ userId, sessionId, userMessage }) {
-  // Step 1: Session fetch karo ya naya banao
   let session;
   if (sessionId) {
     session = await ChatSession.findOne({ _id: sessionId, user: userId });
@@ -51,19 +51,20 @@ async function runAgent({ userId, sessionId, userMessage }) {
     session = await ChatSession.create({ user: userId, messages: [] });
   }
 
-  // Step 2: Purani history + naya message combine karo
-  const history = session.messages.map((m) => ({
-    role: m.role,
-    content: m.content,
-    ...(m.toolCallId ? { tool_call_id: m.toolCallId } : {}),
-  }));
+  // Purani history ko Groq format mein reconstruct karo
+  const history = session.messages.map((m) => {
+    if (m.role === 'assistant' && m.toolCalls && m.toolCalls.length > 0) {
+      return { role: 'assistant', content: m.content || null, tool_calls: m.toolCalls };
+    }
+    if (m.role === 'tool') {
+      return { role: 'tool', tool_call_id: m.toolCallId, name: m.toolName, content: m.content };
+    }
+    return { role: m.role, content: m.content };
+  });
 
   let messages = [...history, { role: 'user', content: userMessage }];
-
-  // Naya user message DB mein save karo
   session.messages.push({ role: 'user', content: userMessage });
 
-  // Step 3: Pehla Groq call — tool chahiye ya nahi decide karega
   let response = await client.chat.completions.create({
     model: GROQ_MODEL,
     messages,
@@ -78,6 +79,13 @@ async function runAgent({ userId, sessionId, userMessage }) {
 
   if (toolCalls && toolCalls.length > 0) {
     messages.push(responseMessage);
+
+    // Assistant ka tool-call request DB mein save karo (poore tool_calls array ke saath)
+    session.messages.push({
+      role: 'assistant',
+      content: responseMessage.content || '',
+      toolCalls: toolCalls,
+    });
 
     for (const toolCall of toolCalls) {
       const functionName = toolCall.function.name;
@@ -95,20 +103,20 @@ async function runAgent({ userId, sessionId, userMessage }) {
       const toolMessage = {
         role: 'tool',
         tool_call_id: toolCall.id,
+        name: functionName,
         content: JSON.stringify(functionResult)
       };
 
       messages.push(toolMessage);
 
-      // Tool result bhi DB mein save karo (context ke liye)
       session.messages.push({
         role: 'tool',
         content: toolMessage.content,
         toolCallId: toolCall.id,
+        toolName: functionName,
       });
     }
 
-    // Dusra call — final answer tool results ke saath
     response = await client.chat.completions.create({
       model: GROQ_MODEL,
       messages
@@ -119,11 +127,9 @@ async function runAgent({ userId, sessionId, userMessage }) {
     finalReply = responseMessage.content;
   }
 
-  // Step 4: Assistant ka final reply bhi DB mein save karo
   session.messages.push({ role: 'assistant', content: finalReply });
   await session.save();
 
   return { reply: finalReply, sessionId: session._id };
 }
-
 module.exports = { client, availableFunctions, tools, runAgent };

@@ -9,10 +9,17 @@ const messageSchema = new mongoose.Schema(
     },
     content: {
       type: String,
-      required: true,
+      default: '',
     },
     toolCallId: {
-      type: String, // sirf 'tool' role messages ke liye use hoga
+      type: String, // sirf 'tool' role messages ke liye
+    },
+    toolName: {
+      type: String, // sirf 'tool' role messages ke liye (function ka naam)
+    },
+    toolCalls: {
+      type: [mongoose.Schema.Types.Mixed], // sirf 'assistant' role messages ke liye, jab tool call hua ho
+      default: undefined,
     },
   },
   { timestamps: true }
