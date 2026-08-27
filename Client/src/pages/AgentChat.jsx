@@ -21,14 +21,87 @@ const AgentChat = () => {
   }, [messages]);
 
   const formatMessage = (text) => {
-    return text
-      .replace(/\*\*(.*?):\*\*\s*/g, '<br/><strong>$1:</strong><br/>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\s*\*\s+/g, '<br/>• ')
-      .replace(/\*(?!\*)/g, '')
-      .replace(/\n/g, '<br/>')
-      .replace(/(<br\/>\s*){3,}/g, '<br/><br/>')
-      .replace(/^(<br\/>)+/, '');
+    const lines = text.split('\n');
+    let html = '';
+    let inTable = false;
+    let tableRows = [];
+
+    const flushTable = () => {
+      if (tableRows.length === 0) return;
+      const [headerRow, ...bodyRows] = tableRows;
+      html += '<table class="w-full text-sm my-3 border-collapse">';
+      html += '<thead><tr>';
+      headerRow.forEach((cell) => {
+        html += `<th class="border border-gray-700 px-3 py-2 bg-gray-700 text-left">${cell}</th>`;
+      });
+      html += '</tr></thead><tbody>';
+      bodyRows.forEach((row) => {
+        html += '<tr>';
+        row.forEach((cell) => {
+          html += `<td class="border border-gray-700 px-3 py-2 align-top">${cell}</td>`;
+        });
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+      tableRows = [];
+    };
+
+    const inlineFormat = (str) =>
+      str
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/`(.*?)`/g, '<code class="bg-gray-700 px-1 py-0.5 rounded text-xs">$1</code>');
+
+    lines.forEach((line) => {
+      const trimmed = line.trim();
+
+      // Table row detection: starts and ends with |
+      if (/^\|.*\|$/.test(trimmed)) {
+        const cells = trimmed
+          .split('|')
+          .slice(1, -1)
+          .map((c) => c.trim());
+
+        // Skip separator rows like |---|---|
+        const isSeparator = cells.every((c) => /^:?-+:?$/.test(c));
+        if (!isSeparator) {
+          tableRows.push(cells.map(inlineFormat));
+        }
+        inTable = true;
+        return;
+      } else if (inTable) {
+        flushTable();
+        inTable = false;
+      }
+
+      // Headings
+      if (/^####\s+/.test(trimmed)) {
+        html += `<h4 class="text-sm font-bold text-purple-300 mt-3 mb-1">${inlineFormat(trimmed.replace(/^####\s+/, ''))}</h4>`;
+        return;
+      }
+      if (/^###\s+/.test(trimmed)) {
+        html += `<h3 class="text-base font-bold text-purple-300 mt-3 mb-1">${inlineFormat(trimmed.replace(/^###\s+/, ''))}</h3>`;
+        return;
+      }
+
+      // Bullets
+      if (/^[-*]\s+/.test(trimmed)) {
+        html += `<div class="pl-2">• ${inlineFormat(trimmed.replace(/^[-*]\s+/, ''))}</div>`;
+        return;
+      }
+
+      // Empty line
+      if (trimmed === '') {
+        html += '<div class="h-2"></div>';
+        return;
+      }
+
+      // Normal paragraph line
+      html += `<div>${inlineFormat(trimmed)}</div>`;
+    });
+
+    flushTable(); // agar text table pe khatam ho raha ho
+
+    return html;
   };
 
   const sendMessage = async () => {
