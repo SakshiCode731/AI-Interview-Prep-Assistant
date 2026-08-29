@@ -132,4 +132,37 @@ async function runAgent({ userId, sessionId, userMessage }) {
 
   return { reply: finalReply, sessionId: session._id };
 }
-module.exports = { client, availableFunctions, tools, runAgent };
+// --- List all sessions for a user ---
+async function listSessions(userId) {
+  const sessions = await ChatSession.find({ user: userId })
+    .select('title createdAt updatedAt messages')
+    .sort({ updatedAt: -1 });
+
+  // Har session ke liye sirf summary bhejo (poora messages array nahi, taaki response halka rahe)
+  return sessions.map((s) => {
+    const lastUserMsg = [...s.messages].reverse().find((m) => m.role === 'user');
+    return {
+      sessionId: s._id,
+      title: s.title,
+      preview: lastUserMsg ? lastUserMsg.content.slice(0, 60) : 'New conversation',
+      updatedAt: s.updatedAt,
+      createdAt: s.createdAt,
+    };
+  });
+}
+
+// --- Get full session (poora chat history) ---
+async function getSession(userId, sessionId) {
+  const session = await ChatSession.findOne({ _id: sessionId, user: userId });
+  if (!session) {
+    throw new Error('Session not found');
+  }
+
+  // Sirf user/assistant messages frontend ko bhejo (tool messages internal hain, UI mein nahi dikhane)
+  const displayMessages = session.messages
+    .filter((m) => m.role === 'user' || m.role === 'assistant')
+    .map((m) => ({ role: m.role, content: m.content }));
+
+  return { sessionId: session._id, title: session.title, messages: displayMessages };
+}
+module.exports = { client, availableFunctions, tools, runAgent, listSessions, getSession };

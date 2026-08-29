@@ -7,3 +7,13 @@ export const sendAgentMessage = async (message, sessionId = null) => {
   });
   return response.data; // { reply, sessionId }
 };
+
+export const listAgentSessions = async () => {
+  const response = await API.get('/mock-interview/agent/sessions');
+  return response.data.sessions; // array of { sessionId, title, preview, updatedAt, createdAt }
+};
+
+export const getAgentSession = async (sessionId) => {
+  const response = await API.get(`/mock-interview/agent/sessions/${sessionId}`);
+  return response.data; // { sessionId, title, messages }
+};
