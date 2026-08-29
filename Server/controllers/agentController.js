@@ -117,9 +117,16 @@ async function runAgent({ userId, sessionId, userMessage }) {
       });
     }
 
+    // Dusra call — final answer, natural language mein (raw JSON nahi)
     response = await client.chat.completions.create({
       model: GROQ_MODEL,
-      messages
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a helpful interview prep assistant. When presenting tool results (questions, evaluations), always respond in clear, natural, well-formatted language for a chat UI — never output raw JSON or code blocks. Use markdown headings, bold text, and tables where helpful.'
+        },
+        ...messages
+      ]
     });
 
     finalReply = response.choices[0].message.content;
@@ -132,6 +139,7 @@ async function runAgent({ userId, sessionId, userMessage }) {
 
   return { reply: finalReply, sessionId: session._id };
 }
+
 // --- List all sessions for a user ---
 async function listSessions(userId) {
   const sessions = await ChatSession.find({ user: userId })
@@ -165,4 +173,5 @@ async function getSession(userId, sessionId) {
 
   return { sessionId: session._id, title: session.title, messages: displayMessages };
 }
+
 module.exports = { client, availableFunctions, tools, runAgent, listSessions, getSession };
