@@ -2,6 +2,7 @@ const Groq = require('groq-sdk');
 const Answer = require('../models/Answer');
 const Sentry = require('@sentry/node');
 const { GROQ_MODEL } = require('../config/groqConfig');
+const { createNotification } = require('../services/notificationservice');
 
 const getMockQuestions = async (req, res) => {
   try {
@@ -103,6 +104,14 @@ Evaluate the answer on correctness, clarity, and completeness. Respond in JSON f
       strengths: evaluation.strengths,
       improvement: evaluation.improvement
     });
+
+    // Real notification — fires only after the answer was actually scored and saved.
+    createNotification(req.user._id, {
+      type: 'mock_interview',
+      title: 'Mock interview answer scored',
+      message: `You scored ${evaluation.score}/10 on this question`,
+      link: '/progress',
+    }).catch((err) => Sentry.captureException(err));
 
     res.status(200).json({
       message: 'Answer evaluated',

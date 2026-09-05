@@ -52,7 +52,6 @@ Sentry.setupExpressErrorHandler(app);
 
 const PORT = process.env.PORT || 5000;
 
-// http server wraps the express app so socket.io can attach to the same port
 const server = http.createServer(app);
 initSocket(server);
 

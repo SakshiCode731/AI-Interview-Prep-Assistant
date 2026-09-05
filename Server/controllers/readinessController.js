@@ -2,6 +2,7 @@ const Groq = require('groq-sdk');
 const Sentry = require('@sentry/node');
 const Readiness = require('../models/Readiness');
 const { GROQ_MODEL } = require('../config/groqConfig');
+const { createNotification } = require('../services/notificationservice');
 
 const getReadinessScore = async (req, res) => {
   try {
@@ -47,6 +48,14 @@ Respond in JSON format only, no extra text:
       improvements: response.improvements || [],
       summary: response.summary || '',
     });
+
+    // Real notification — fires only after the score was actually generated and saved.
+    createNotification(req.user._id, {
+      type: 'readiness_analyzed',
+      title: 'Readiness score updated',
+      message: `Your new readiness score for ${jobRole} is ${response.score}/100`,
+      link: '/readiness',
+    }).catch((err) => Sentry.captureException(err));
 
     res.status(200).json({
       message: 'Readiness score generated',

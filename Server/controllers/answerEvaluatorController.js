@@ -3,6 +3,7 @@ const Answer = require('../models/Answer');
 const crypto = require('crypto');
 const Sentry = require('@sentry/node');
 const { GROQ_MODEL } = require('../config/groqConfig');
+const { createNotification } = require('../services/notificationService');
 
 const evaluateAnswer = async (req, res) => {
   try {
@@ -79,6 +80,17 @@ Rules:
       feedback: response.feedback,
       strengths: Array.isArray(response.strengths) ? response.strengths.join('; ') : (response.strengths || ''),
       improvement: Array.isArray(response.improvements) ? response.improvements.join('; ') : (response.improvements || '')
+    });
+
+    // Real notification — fires only after the evaluation actually succeeded and saved.
+    createNotification(req.user._id, {
+      type: 'answer_evaluated',
+      title: 'Answer evaluated',
+      message: `Your answer scored ${response.score}/10 — ${response.verdict || 'feedback ready'}`,
+      link: '/answer-evaluator',
+    }).catch((err) => {
+      console.error('Notification creation failed:', err);
+      Sentry.captureException(err);
     });
 
     res.status(200).json({
