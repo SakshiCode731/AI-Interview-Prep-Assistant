@@ -2,7 +2,7 @@ const Groq = require('groq-sdk');
 const Sentry = require('@sentry/node');
 const Readiness = require('../models/Readiness');
 const { GROQ_MODEL } = require('../config/groqConfig');
-const { createNotification } = require('../services/notificationservice');
+const { createNotification } = require('../services/notificationService');
 
 const getReadinessScore = async (req, res) => {
   try {

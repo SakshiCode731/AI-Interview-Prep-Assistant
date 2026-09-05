@@ -2,7 +2,7 @@ const Groq = require('groq-sdk');
 const Answer = require('../models/Answer');
 const Sentry = require('@sentry/node');
 const { GROQ_MODEL } = require('../config/groqConfig');
-const { createNotification } = require('../services/notificationservice');
+const { createNotification } = require('../services/notificationService');
 
 const getMockQuestions = async (req, res) => {
   try {
