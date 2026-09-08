@@ -83,15 +83,19 @@ Rules:
     });
 
     // Real notification — fires only after the evaluation actually succeeded and saved.
+    console.log('✅ Answer saved, about to create notification for user:', req.user._id);
+
     createNotification(req.user._id, {
       type: 'answer_evaluated',
       title: 'Answer evaluated',
       message: `Your answer scored ${response.score}/10 — ${response.verdict || 'feedback ready'}`,
       link: '/answer-evaluator',
-    }).catch((err) => {
-      console.error('Notification creation failed:', err);
-      Sentry.captureException(err);
-    });
+    })
+      .then((n) => console.log('✅ Notification created successfully:', n._id))
+      .catch((err) => {
+        console.log('❌ Notification creation FAILED:', err.message);
+        Sentry.captureException(err);
+      });
 
     res.status(200).json({
       message: 'Answer evaluated successfully',
