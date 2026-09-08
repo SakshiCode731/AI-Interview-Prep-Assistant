@@ -1,14 +1,39 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence, animate, useReducedMotion } from 'framer-motion';
+import { 
+  LayoutDashboard, 
+  TrendingUp, 
+  Building2, 
+  FileText, 
+  Target, 
+  BarChart2, 
+  HelpCircle, 
+  CheckCircle2, 
+  Cpu, 
+  Bot, 
+  Sparkles, 
+  Shirt, 
+  BrainCircuit, 
+  Users, 
+  Bookmark, 
+  Settings, 
+  Search, 
+  Bell, 
+  LogOut, 
+  ChevronRight, 
+  ArrowRight,
+  Flame,
+  Award
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
 import API from '../services/api';
 
 const statusToColor = {
-  strong: 'bg-emerald-400',
-  average: 'bg-amber-400',
-  weak: 'bg-rose-400',
+  strong: 'from-emerald-500 to-teal-400',
+  average: 'from-amber-500 to-yellow-400',
+  weak: 'from-rose-500 to-red-400',
 };
 
 const getGreeting = () => {
@@ -25,12 +50,12 @@ const getReadinessLabel = (score) => {
 };
 
 const containerVariants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.05 } },
+  hidden: { opacity: 0 },
+  show: { opacity: 1, transition: { staggerChildren: 0.06 } },
 };
 
 const itemVariants = {
-  hidden: { opacity: 0, y: 10 },
+  hidden: { opacity: 0, y: 12 },
   show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
 };
 
@@ -45,7 +70,7 @@ const CountUp = ({ value, decimals = 0 }) => {
       return;
     }
     const controls = animate(0, value, {
-      duration: 1,
+      duration: 1.2,
       ease: [0.16, 1, 0.3, 1],
       onUpdate: (v) => setDisplay(Number(v.toFixed(decimals))),
     });
@@ -56,10 +81,9 @@ const CountUp = ({ value, decimals = 0 }) => {
   return <>{decimals ? display.toFixed(decimals) : Math.round(display)}</>;
 };
 
-// Refined gauge: thinner ring, no tick marks, quieter — reads as instrumentation, not decoration.
-const ReadinessGauge = ({ score = 0, active = true, size = 176 }) => {
+const ReadinessGauge = ({ score = 0, active = true, size = 160 }) => {
   const shouldReduceMotion = useReducedMotion();
-  const r = size * 0.42;
+  const r = size * 0.4;
   const cx = size / 2;
   const cy = size / 2;
   const circumference = 2 * Math.PI * r;
@@ -67,24 +91,32 @@ const ReadinessGauge = ({ score = 0, active = true, size = 176 }) => {
   const offset = circumference * (1 - clamped / 100);
 
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
-      <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1B1E27" strokeWidth={8} />
-      {active && (
-        <motion.circle
-          cx={cx}
-          cy={cy}
-          r={r}
-          fill="none"
-          stroke="#6366F1"
-          strokeWidth={8}
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          initial={{ strokeDashoffset: circumference }}
-          animate={{ strokeDashoffset: offset }}
-          transition={{ duration: shouldReduceMotion ? 0 : 1.2, ease: [0.16, 1, 0.3, 1] }}
-        />
-      )}
-    </svg>
+    <div className="relative flex items-center justify-center">
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
+        <defs>
+          <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#818CF8" />
+            <stop offset="100%" stopColor="#4F46E5" />
+          </linearGradient>
+        </defs>
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1A1D26" strokeWidth={8} />
+        {active && (
+          <motion.circle
+            cx={cx}
+            cy={cy}
+            r={r}
+            fill="none"
+            stroke="url(#gaugeGradient)"
+            strokeWidth={8}
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            initial={{ strokeDashoffset: circumference }}
+            animate={{ strokeDashoffset: offset }}
+            transition={{ duration: shouldReduceMotion ? 0 : 1.2, ease: [0.16, 1, 0.3, 1] }}
+          />
+        )}
+      </svg>
+    </div>
   );
 };
 
@@ -102,8 +134,6 @@ const Dashboard = () => {
 
   const [readiness, setReadiness] = useState(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
-
-  const shouldReduceMotion = useReducedMotion();
 
   useEffect(() => {
     const fetchProgress = async () => {
@@ -150,7 +180,7 @@ const Dashboard = () => {
     .map((t) => ({
       name: t.topic,
       pct: t.avgScore,
-      color: statusToColor[t.status] || 'bg-indigo-400',
+      color: statusToColor[t.status] || 'from-indigo-500 to-indigo-400',
     }));
 
   const readinessBreakdown = readinessAnalyzed
@@ -163,102 +193,116 @@ const Dashboard = () => {
     : [];
 
   const navItems = [
-    { section: 'Overview', items: [{ label: 'Dashboard', icon: '⊞', path: '/dashboard', active: true }, { label: 'Progress tracker', icon: '📈', path: '/progress' }] },
-    { section: 'Preparation', items: [{ label: 'Company prep', icon: '🏢', path: '/companies' }, { label: 'Resume upload', icon: '📄', path: '/resume' }, { label: 'Readiness score', icon: '🎯', path: '/readiness' }, { label: 'Skill gap analysis', icon: '📊', path: '/progress' }] },
-    { section: 'Practice', items: [{ label: 'Mock interview', icon: '❓', path: '/mock-interview', badge: 5 }, { label: 'Answer evaluator', icon: '✅', path: '/answer-evaluator' }, { label: 'System design', icon: '🏗️', path: '/system-design' }, { label: 'AI chatbot', icon: '🤖', path: '/chatbot' }, { label: 'AI Agent', icon: '🧠', path: '/agent-chat' }] },
-    { section: 'Guides', items: [{ label: 'Dressing guide', icon: '👔', path: '/dressing-guide' }, { label: 'Confidence guide', icon: '🧘', path: '/confidence-guide' }, { label: 'Behavior guide', icon: '🤝', path: '/behavior-guide' }] },
-    { section: 'Account', items: [{ label: 'Bookmarks', icon: '🔖', path: '/bookmarks' }, { label: 'Settings', icon: '⚙️' }] },
+    { section: 'Overview', items: [{ label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard', active: true }, { label: 'Progress tracker', icon: TrendingUp, path: '/progress' }] },
+    { section: 'Preparation', items: [{ label: 'Company prep', icon: Building2, path: '/companies' }, { label: 'Resume upload', icon: FileText, path: '/resume' }, { label: 'Readiness score', icon: Target, path: '/readiness' }, { label: 'Skill gap analysis', icon: BarChart2, path: '/progress' }] },
+    { section: 'Practice', items: [{ label: 'Mock interview', icon: HelpCircle, path: '/mock-interview', badge: 5 }, { label: 'Answer evaluator', icon: CheckCircle2, path: '/answer-evaluator' }, { label: 'System design', icon: Cpu, path: '/system-design' }, { label: 'AI chatbot', icon: Bot, path: '/chatbot' }, { label: 'AI Agent', icon: Sparkles, path: '/agent-chat' }] },
+    { section: 'Guides', items: [{ label: 'Dressing guide', icon: Shirt, path: '/dressing-guide' }, { label: 'Confidence guide', icon: BrainCircuit, path: '/confidence-guide' }, { label: 'Behavior guide', icon: Users, path: '/behavior-guide' }] },
+    { section: 'Account', items: [{ label: 'Bookmarks', icon: Bookmark, path: '/bookmarks' }, { label: 'Settings', icon: Settings }] },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0B0D12] text-[#EDEEF2] flex">
+    <div className="min-h-screen bg-[#0A0B0E] text-[#E2E8F0] flex font-sans antialiased selection:bg-indigo-500/30">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600;700&display=swap');
-        .font-sans { font-family: 'Inter', sans-serif; }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+        .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
         .font-data { font-family: 'JetBrains Mono', monospace; }
+        
+        /* Clean no-scrollbar layout */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Sidebar */}
-      <aside className="w-60 bg-[#0D0F16] border-r border-[#1B1E27] flex flex-col flex-shrink-0 h-screen sticky top-0">
-        <div className="h-16 flex items-center gap-2.5 px-5 border-b border-[#1B1E27] flex-shrink-0">
-          <div className="w-7 h-7 rounded-lg bg-indigo-500 flex items-center justify-center text-white text-sm font-bold font-sans">P</div>
-          <span className="font-semibold text-[15px] tracking-tight font-sans">PrepAI</span>
+      <aside className="w-64 bg-[#0E1017] border-r border-[#1E2230] flex flex-col flex-shrink-0 h-screen sticky top-0 z-30">
+        {/* Brand Header */}
+        <div className="h-16 flex items-center gap-3 px-6 border-b border-[#1E2230] flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-indigo-500/20">
+            P
+          </div>
+          <span className="font-bold text-base tracking-tight text-white">PrepAI</span>
+          <span className="ml-auto text-[10px] bg-indigo-500/10 text-indigo-400 font-semibold px-2 py-0.5 rounded-full border border-indigo-500/20">PRO</span>
         </div>
 
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
+        {/* Clean Sidebar Navigation */}
+        <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-6">
           {navItems.map((group, gi) => (
-            <div key={gi} className="mb-5">
-              <p className="text-[10px] text-[#565C6E] uppercase tracking-[0.14em] mb-1.5 px-2.5 font-sans font-medium">{group.section}</p>
-              {group.items.map((item, ii) => (
-                <button
-                  key={ii}
-                  onClick={() => item.path && navigate(item.path)}
-                  className={`w-full flex items-center gap-2.5 px-2.5 py-[7px] rounded-lg text-[13.5px] mb-0.5 transition font-sans ${
-                    item.active
-                      ? 'bg-indigo-500/12 text-indigo-300 font-medium'
-                      : 'text-[#9195A6] hover:text-[#EDEEF2] hover:bg-[#161923]'
-                  }`}
-                >
-                  <span className="text-[13px] w-4 text-center opacity-90">{item.icon}</span>
-                  <span className="flex-1 text-left">{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[10px] bg-indigo-500/15 text-indigo-300 px-1.5 py-0.5 rounded-full font-data">{item.badge}</span>
-                  )}
-                </button>
-              ))}
+            <div key={gi}>
+              <p className="text-[10px] text-[#525866] uppercase font-bold tracking-widest mb-2 px-3">{group.section}</p>
+              <div className="space-y-1">
+                {group.items.map((item, ii) => {
+                  const Icon = item.icon;
+                  return (
+                    <button
+                      key={ii}
+                      onClick={() => item.path && navigate(item.path)}
+                      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 group ${
+                        item.active
+                          ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/20'
+                          : 'text-[#8A8F9E] hover:text-white hover:bg-[#161926]'
+                      }`}
+                    >
+                      <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${item.active ? 'text-indigo-400' : 'text-[#646A7E]'}`} />
+                      <span className="flex-1 text-left truncate">{item.label}</span>
+                      {item.badge && (
+                        <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-data font-semibold">
+                          {item.badge}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </nav>
 
-        <div className="border-t border-[#1B1E27] p-3">
+        {/* User Profile Footer */}
+        <div className="border-t border-[#1E2230] p-3">
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-[#161923] transition text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#161926] transition text-left"
             >
-              <div className="w-7 h-7 rounded-full bg-indigo-500 flex items-center justify-center text-xs font-bold text-white flex-shrink-0 font-sans">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-md">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-[13px] font-medium truncate font-sans">{user?.name || 'User'}</p>
-                <p className="text-[11px] text-[#565C6E] truncate font-sans">{user?.email}</p>
+                <p className="text-xs font-semibold text-white truncate">{user?.name || 'User'}</p>
+                <p className="text-[10px] text-[#525866] truncate">{user?.email}</p>
               </div>
             </button>
 
             <AnimatePresence>
               {showProfile && (
                 <motion.div
-                  initial={{ opacity: 0, y: 6 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 6 }}
-                  transition={{ duration: 0.15 }}
-                  className="absolute left-0 bottom-full mb-2 w-64 bg-[#14161D] border border-[#1B1E27] rounded-xl shadow-2xl z-50 overflow-hidden"
+                  exit={{ opacity: 0, y: 8 }}
+                  className="absolute left-0 bottom-full mb-2 w-60 bg-[#12141D] border border-[#1E2230] rounded-2xl shadow-2xl z-50 overflow-hidden"
                 >
-                  <div className="grid grid-cols-3 border-b border-[#1B1E27] font-data">
-                    <div className="text-center py-3 border-r border-[#1B1E27]">
-                      <p className="text-white font-semibold text-[15px]">{readinessLoading ? '···' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
-                      <p className="text-[#565C6E] text-[10px] font-sans mt-0.5">Readiness</p>
+                  <div className="grid grid-cols-3 border-b border-[#1E2230] text-center py-2.5 bg-[#161926]/50 font-data">
+                    <div>
+                      <p className="text-xs font-bold text-white">{readinessLoading ? '···' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
+                      <p className="text-[9px] text-[#525866] font-sans">Readiness</p>
                     </div>
-                    <div className="text-center py-3 border-r border-[#1B1E27]">
-                      <p className="text-white font-semibold text-[15px]">{progressLoading ? '···' : (questionsPracticed ?? 0)}</p>
-                      <p className="text-[#565C6E] text-[10px] font-sans mt-0.5">Practiced</p>
+                    <div className="border-x border-[#1E2230]">
+                      <p className="text-xs font-bold text-white">{progressLoading ? '···' : (questionsPracticed ?? 0)}</p>
+                      <p className="text-[9px] text-[#525866] font-sans">Practiced</p>
                     </div>
-                    <div className="text-center py-3">
-                      <p className="text-white font-semibold text-[15px]">{companiesSaved}</p>
-                      <p className="text-[#565C6E] text-[10px] font-sans mt-0.5">Companies</p>
+                    <div>
+                      <p className="text-xs font-bold text-white">{companiesSaved}</p>
+                      <p className="text-[9px] text-[#525866] font-sans">Saved</p>
                     </div>
                   </div>
-                  <div className="py-1.5">
-                    <button onClick={() => { setShowProfile(false); navigate('/resume'); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9195A6] hover:bg-[#1B1E27] hover:text-white transition text-left font-sans">
-                      <span>📄</span> My Resume
+                  <div className="p-1.5 space-y-1">
+                    <button onClick={() => { setShowProfile(false); navigate('/resume'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-[#8A8F9E] hover:bg-[#1A1D2B] hover:text-white rounded-xl transition text-left">
+                      <FileText className="w-3.5 h-3.5" /> My Resume
                     </button>
-                    <button onClick={() => { setShowProfile(false); navigate('/readiness'); }} className="w-full flex items-center gap-2.5 px-4 py-2.5 text-[13px] text-[#9195A6] hover:bg-[#1B1E27] hover:text-white transition text-left font-sans">
-                      <span>🎯</span> Readiness Score
+                    <button onClick={() => { setShowProfile(false); navigate('/readiness'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-[#8A8F9E] hover:bg-[#1A1D2B] hover:text-white rounded-xl transition text-left">
+                      <Target className="w-3.5 h-3.5" /> Readiness Score
                     </button>
-                  </div>
-                  <div className="border-t border-[#1B1E27] p-2.5">
-                    <button onClick={handleLogout} className="w-full py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 rounded-lg text-[13px] font-medium transition font-sans">
-                      Log out
+                    <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl transition text-left font-medium">
+                      <LogOut className="w-3.5 h-3.5" /> Log out
                     </button>
                   </div>
                 </motion.div>
@@ -269,223 +313,214 @@ const Dashboard = () => {
         </div>
       </aside>
 
-      {/* Main */}
+      {/* Main Workspace Area */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Top strip: search + bell */}
-        <header className="h-16 border-b border-[#1B1E27] px-8 flex items-center justify-between flex-shrink-0 sticky top-0 bg-[#0B0D12]/95 backdrop-blur z-20">
-          <div className="relative">
-            <AnimatePresence mode="wait">
-              {showSearch ? (
-                <motion.input
-                  key="search-input"
-                  initial={{ width: 40, opacity: 0 }}
-                  animate={{ width: 260, opacity: 1 }}
-                  exit={{ width: 40, opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                  type="text"
-                  autoFocus
-                  placeholder="Search companies, guides..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' && searchQuery.trim() !== '') {
-                      navigate(`/companies?search=${encodeURIComponent(searchQuery.trim())}`);
-                      setShowSearch(false);
-                      setSearchQuery('');
-                    }
-                  }}
-                  onBlur={() => setTimeout(() => setShowSearch(false), 150)}
-                  className="bg-[#14161D] border border-[#23262F] rounded-lg px-3.5 py-1.5 text-[13px] text-white placeholder-[#565C6E] focus:outline-none focus:border-indigo-500 font-sans"
-                />
-              ) : (
-                <motion.button
-                  key="search-icon"
-                  onClick={() => setShowSearch(true)}
-                  className="w-8 h-8 flex items-center justify-center text-[#9195A6] hover:text-white transition rounded-lg hover:bg-[#161923]"
-                >
-                  🔍
-                </motion.button>
-              )}
-            </AnimatePresence>
+        {/* Top Navbar Header */}
+        <header className="h-16 border-b border-[#1E2230] px-8 flex items-center justify-between sticky top-0 bg-[#0A0B0E]/80 backdrop-blur-xl z-20">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#525866]" />
+              <input
+                type="text"
+                placeholder="Search companies, topics, guides..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchQuery.trim() !== '') {
+                    navigate(`/companies?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setSearchQuery('');
+                  }
+                }}
+                className="w-72 bg-[#12141D] border border-[#1E2230] rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder-[#525866] focus:outline-none focus:border-indigo-500 transition"
+              />
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <div className="relative">
-              <button
-                onClick={() => setShowNotifications(!showNotifications)}
-                className="w-8 h-8 flex items-center justify-center text-[#9195A6] hover:text-white transition rounded-lg hover:bg-[#161923] relative"
-              >
-                🔔
-                {notifications.some((n) => n.unread) && (
-                  <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-400 rounded-full" />
-                )}
-              </button>
-              <AnimatePresence>
-                {showNotifications && (
-                  <motion.div
-                    initial={{ opacity: 0, y: -6 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -6 }}
-                    transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-11 w-80 bg-[#14161D] border border-[#1B1E27] rounded-xl shadow-2xl z-50 overflow-hidden"
-                  >
-                    <div className="px-4 py-3 border-b border-[#1B1E27]">
-                      <p className="font-medium text-white text-[13px] font-sans">Notifications</p>
-                    </div>
-                    <div className="px-4 py-7 text-center">
-                      <p className="text-[#9195A6] text-[13px] font-sans">No notifications yet</p>
-                      <p className="text-[#565C6E] text-[11px] mt-1 font-sans">We'll let you know when there's something new</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              {showNotifications && <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />}
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowNotifications(!showNotifications)}
+              className="p-2 rounded-xl bg-[#12141D] border border-[#1E2230] text-[#8A8F9E] hover:text-white transition relative"
+            >
+              <Bell className="w-4 h-4" />
+              {notifications.some((n) => n.unread) && (
+                <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-rose-500 rounded-full" />
+              )}
+            </button>
           </div>
         </header>
 
-        {/* Content */}
-        <motion.main variants={containerVariants} initial="hidden" animate="show" className="flex-1 overflow-y-auto px-8 py-8">
-          <motion.div variants={itemVariants} className="mb-7">
-            <h1 className="text-[22px] font-semibold font-sans tracking-tight">{getGreeting()}, {user?.name?.split(' ')[0] || 'there'}</h1>
-            <p className="text-[#9195A6] text-[13.5px] mt-0.5 font-sans">Your interview readiness snapshot for today</p>
+        {/* Dashboard Main Content */}
+        <motion.main variants={containerVariants} initial="hidden" animate="show" className="flex-1 overflow-y-auto no-scrollbar px-8 py-8 space-y-6">
+          {/* Greeting Header */}
+          <motion.div variants={itemVariants} className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-white tracking-tight">
+                {getGreeting()}, <span className="text-indigo-400">{user?.name?.split(' ')[0] || 'there'}</span> 👋
+              </h1>
+              <p className="text-xs text-[#8A8F9E] mt-1">Here is your active interview readiness & practice snapshot.</p>
+            </div>
           </motion.div>
 
-          {/* Hero row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-4">
+          {/* Hero Row Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            {/* Main Readiness Hero Card */}
             <motion.div
               variants={itemVariants}
               onClick={() => navigate('/readiness')}
-              className="lg:col-span-2 bg-[#14161D] border border-[#1B1E27] rounded-2xl p-7 cursor-pointer flex flex-col sm:flex-row items-center gap-7 hover:border-[#2A2E3B] transition-colors"
+              className="lg:col-span-2 bg-gradient-to-br from-[#12141D] via-[#10121A] to-[#0E0F16] border border-[#1E2230] hover:border-indigo-500/40 rounded-2xl p-6 cursor-pointer flex flex-col sm:flex-row items-center gap-6 relative overflow-hidden transition-all group shadow-xl"
             >
-              <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: 176, height: 176 }}>
-                <ReadinessGauge score={readinessAnalyzed ? readinessScore : 0} active={!readinessLoading} size={176} />
-                <div className="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
-                  <span className="text-[9px] tracking-[0.18em] text-[#565C6E] font-sans uppercase">Readiness</span>
-                  <span className="text-3xl font-semibold font-data mt-1.5 leading-none">
-                    {readinessLoading ? (
-                      <span className="text-[#565C6E]">—</span>
-                    ) : readinessAnalyzed ? (
-                      <>
-                        <CountUp value={readinessScore} /><span className="text-sm text-[#565C6E]">%</span>
-                      </>
-                    ) : (
-                      <span className="text-[#565C6E]">—</span>
-                    )}
+              <div className="absolute -right-16 -bottom-16 w-56 h-56 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none group-hover:bg-indigo-500/20 transition" />
+
+              <div className="relative flex items-center justify-center flex-shrink-0" style={{ width: 160, height: 160 }}>
+                <ReadinessGauge score={readinessAnalyzed ? readinessScore : 0} active={!readinessLoading} size={160} />
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <span className="text-[9px] font-bold tracking-widest text-[#525866] uppercase">Score</span>
+                  <span className="text-3xl font-extrabold font-data text-white mt-1">
+                    {readinessLoading ? '···' : readinessAnalyzed ? <CountUp value={readinessScore} /> : '—'}
+                    {readinessAnalyzed && <span className="text-xs text-indigo-400 ml-0.5">%</span>}
                   </span>
-                  <span className="text-[11px] text-[#9195A6] mt-1.5 max-w-[140px] font-sans leading-tight">
-                    {readinessLoading ? 'Reading signal…' : readinessAnalyzed ? getReadinessLabel(readinessScore) : 'Analyze your resume to activate'}
+                  <span className="text-[10px] text-[#8A8F9E] mt-1 max-w-[110px] leading-tight">
+                    {readinessLoading ? 'Loading…' : readinessAnalyzed ? getReadinessLabel(readinessScore) : 'Not calibrated'}
                   </span>
                 </div>
               </div>
 
-              <div className="flex-1 min-w-0">
-                <h3 className="font-semibold font-sans text-[15px] mb-1">Readiness console</h3>
-                <p className="text-[#9195A6] text-[13px] mb-4 leading-relaxed font-sans">
-                  {readinessAnalyzed
-                    ? 'Based on your last resume analysis. Re-run it any time your resume changes.'
-                    : 'Upload your resume to calibrate your readiness score and unlock a full breakdown.'}
-                </p>
-                <span className="inline-flex items-center gap-1.5 text-[13px] font-medium text-white bg-indigo-500 hover:bg-indigo-600 transition px-4 py-2 rounded-lg font-sans">
-                  {readinessAnalyzed ? 'Re-analyze resume' : 'Get your readiness score'} →
+              <div className="flex-1 min-w-0 text-center sm:text-left z-10">
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-indigo-500/10 text-indigo-400 text-[10px] font-semibold tracking-wider uppercase mb-2 border border-indigo-500/20">
+                  <Flame className="w-3 h-3 text-indigo-400" /> Readiness Console
                 </span>
+                <h3 className="text-lg font-bold text-white mb-1.5">
+                  {readinessAnalyzed ? 'Resume Analyzed & Verified' : 'Calibrate Your Interview Score'}
+                </h3>
+                <p className="text-xs text-[#8A8F9E] mb-4 leading-relaxed">
+                  {readinessAnalyzed
+                    ? 'Your current score is calculated using your uploaded resume against real target profiles.'
+                    : 'Upload your resume to calibrate your readiness score and receive personalized skill gap suggestions.'}
+                </p>
+                <button className="inline-flex items-center gap-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 px-4 py-2 rounded-xl transition shadow-lg shadow-indigo-600/20">
+                  {readinessAnalyzed ? 'Re-analyze resume' : 'Get readiness score'} <ArrowRight className="w-3.5 h-3.5" />
+                </button>
               </div>
             </motion.div>
 
-            <div className="flex flex-col gap-4">
+            {/* Quick Metrics Stack */}
+            <div className="space-y-3 flex flex-col justify-between">
               {[
-                { label: 'Questions practiced', value: questionsPracticed, loading: progressLoading, sub: progress && progress.totalQuestionsAttempted > 0 ? 'Keep it up' : 'Start practicing', path: '/progress' },
-                { label: 'Avg answer score', value: progress?.avgOverallScore, suffix: '/10', decimals: 1, loading: progressLoading, sub: progress && progress.totalQuestionsAttempted > 0 ? 'From recent attempts' : 'No attempts yet', path: '/answer-evaluator' },
-                { label: 'Companies saved', value: companiesSaved, loading: false, sub: companiesSaved > 0 ? `${companiesSaved} bookmarked` : 'No companies saved yet', path: '/bookmarks' },
-              ].map((m, i) => (
-                <motion.div
-                  key={i}
-                  variants={itemVariants}
-                  onClick={() => navigate(m.path)}
-                  className="flex-1 bg-[#14161D] border border-[#1B1E27] rounded-2xl px-5 py-4 cursor-pointer transition-colors hover:border-[#2A2E3B]"
-                >
-                  <p className="text-[#9195A6] text-[12px] mb-1.5 font-sans">{m.label}</p>
-                  <p className="text-[26px] font-semibold font-data leading-none">
-                    {m.loading ? (
-                      <span className="text-[#565C6E]">···</span>
-                    ) : (
-                      <>
-                        <CountUp value={m.value ?? 0} decimals={m.decimals || 0} />
-                        {m.suffix && <span className="text-[13px] text-[#565C6E]">{m.suffix}</span>}
-                      </>
-                    )}
-                  </p>
-                  <p className="text-[11px] mt-1.5 text-[#565C6E] font-sans">{m.sub}</p>
-                </motion.div>
-              ))}
+                { label: 'Questions Practiced', value: questionsPracticed, loading: progressLoading, sub: progress && progress.totalQuestionsAttempted > 0 ? 'Keep building momentum' : 'Start practicing', path: '/progress', icon: Flame },
+                { label: 'Avg Answer Score', value: progress?.avgOverallScore, suffix: '/10', decimals: 1, loading: progressLoading, sub: progress && progress.totalQuestionsAttempted > 0 ? 'Evaluated by AI' : 'No evaluation history', path: '/answer-evaluator', icon: Award },
+                { label: 'Companies Bookmarked', value: companiesSaved, loading: false, sub: companiesSaved > 0 ? `${companiesSaved} targets saved` : 'Save companies for prep', path: '/bookmarks', icon: Bookmark },
+              ].map((m, i) => {
+                const Icon = m.icon;
+                return (
+                  <motion.div
+                    key={i}
+                    variants={itemVariants}
+                    onClick={() => navigate(m.path)}
+                    className="bg-[#12141D] border border-[#1E2230] hover:border-[#2B3044] rounded-2xl px-5 py-3.5 cursor-pointer transition flex items-center justify-between group"
+                  >
+                    <div>
+                      <p className="text-[11px] font-medium text-[#8A8F9E]">{m.label}</p>
+                      <p className="text-xl font-bold font-data text-white mt-0.5">
+                        {m.loading ? (
+                          '···'
+                        ) : (
+                          <>
+                            <CountUp value={m.value ?? 0} decimals={m.decimals || 0} />
+                            {m.suffix && <span className="text-xs text-[#525866] font-normal">{m.suffix}</span>}
+                          </>
+                        )}
+                      </p>
+                      <p className="text-[10px] text-[#525866] mt-0.5">{m.sub}</p>
+                    </div>
+                    <div className="w-9 h-9 rounded-xl bg-[#161926] border border-[#1E2230] flex items-center justify-center text-indigo-400 group-hover:scale-105 transition">
+                      <Icon className="w-4 h-4" />
+                    </div>
+                  </motion.div>
+                );
+              })}
             </div>
           </div>
 
-          {/* Skill gap + readiness breakdown */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <motion.div variants={itemVariants} className="bg-[#14161D] border border-[#1B1E27] rounded-2xl p-6">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="font-semibold font-sans text-[14px]">Skill gap analysis</h3>
-                <button onClick={() => navigate('/progress')} className="text-indigo-400 text-[12px] hover:underline font-sans">View full report</button>
+          {/* Bottom Grid: Skill Gap & Readiness Breakdown */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            {/* Skill Gap Analysis */}
+            <motion.div variants={itemVariants} className="bg-[#12141D] border border-[#1E2230] rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Skill gap analysis</h3>
+                  <p className="text-[11px] text-[#525866]">Performance breakdown across topics</p>
+                </div>
+                <button onClick={() => navigate('/progress')} className="text-xs text-indigo-400 hover:underline font-semibold flex items-center gap-1">
+                  View report <ChevronRight className="w-3 h-3" />
+                </button>
               </div>
+
               {progressLoading ? (
-                <p className="text-[#565C6E] text-[13px] font-sans">Reading signal…</p>
+                <div className="py-8 text-center text-xs text-[#525866]">Loading skills data...</div>
               ) : skills.length === 0 ? (
-                <div className="py-6 text-center">
-                  <p className="text-[#9195A6] text-[13px] font-sans">No practice data yet</p>
-                  <p className="text-[#565C6E] text-[12px] mt-1 font-sans">Attempt a mock interview or answer evaluator question to see your skill breakdown</p>
+                <div className="py-8 text-center bg-[#161926]/40 rounded-xl border border-[#1E2230]">
+                  <p className="text-xs text-[#8A8F9E] font-medium">No practice history available</p>
+                  <p className="text-[11px] text-[#525866] mt-1">Complete mock tests to build your skill profile</p>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {skills.map((s, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className="text-[#9195A6] text-[12px] w-24 flex-shrink-0 truncate font-sans">{s.name}</span>
-                      <div className="relative flex-1 bg-[#0B0D12] rounded-full h-2 overflow-hidden">
+                    <div key={i} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-[#8A8F9E] font-medium">{s.name}</span>
+                        <span className="text-white font-data font-semibold">{s.pct}%</span>
+                      </div>
+                      <div className="w-full bg-[#181B26] rounded-full h-2 overflow-hidden border border-[#1E2230]">
                         <motion.div
-                          className={`${s.color} h-full rounded-full`}
+                          className={`bg-gradient-to-r ${s.color} h-full rounded-full`}
                           initial={{ width: 0 }}
                           animate={{ width: `${s.pct}%` }}
-                          transition={{ duration: 0.7, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                          transition={{ duration: 0.8, delay: i * 0.08 }}
                         />
                       </div>
-                      <span className="text-[#B7BECC] text-[11px] w-8 text-right font-data">{s.pct}%</span>
                     </div>
                   ))}
                 </div>
               )}
             </motion.div>
 
-            <motion.div variants={itemVariants} className="bg-[#14161D] border border-[#1B1E27] rounded-2xl p-6">
-              <div className="flex justify-between items-center mb-5">
-                <h3 className="font-semibold font-sans text-[14px]">Readiness breakdown</h3>
-                <button onClick={() => navigate('/readiness')} className="text-indigo-400 text-[12px] hover:underline font-sans">
-                  {readinessAnalyzed ? 'Re-analyze' : 'Analyze resume'}
+            {/* Readiness Breakdown */}
+            <motion.div variants={itemVariants} className="bg-[#12141D] border border-[#1E2230] rounded-2xl p-6">
+              <div className="flex items-center justify-between mb-5">
+                <div>
+                  <h3 className="text-sm font-bold text-white">Readiness breakdown</h3>
+                  <p className="text-[11px] text-[#525866]">Resume match metrics</p>
+                </div>
+                <button onClick={() => navigate('/readiness')} className="text-xs text-indigo-400 hover:underline font-semibold flex items-center gap-1">
+                  {readinessAnalyzed ? 'Re-analyze' : 'Analyze'} <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
 
               {readinessLoading ? (
-                <p className="text-[#565C6E] text-[13px] font-sans">Reading signal…</p>
+                <div className="py-8 text-center text-xs text-[#525866]">Calculating metrics...</div>
               ) : !readinessAnalyzed ? (
-                <div className="py-6 text-center">
-                  <p className="text-[#9195A6] text-[13px] font-sans">You haven't analyzed your resume yet</p>
-                  <button onClick={() => navigate('/readiness')} className="mt-3 px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-[12px] font-medium rounded-lg transition font-sans">
-                    Get your readiness score
+                <div className="py-8 text-center bg-[#161926]/40 rounded-xl border border-[#1E2230]">
+                  <p className="text-xs text-[#8A8F9E] font-medium">Resume analysis required</p>
+                  <button onClick={() => navigate('/readiness')} className="mt-2 px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-lg transition">
+                    Upload & Calculate
                   </button>
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3.5">
                   {readinessBreakdown.map((r, i) => (
-                    <div key={i} className="flex items-center gap-3">
-                      <span className="text-[#9195A6] text-[12px] w-28 flex-shrink-0 truncate font-sans">{r.label}</span>
-                      <div className="relative flex-1 bg-[#0B0D12] rounded-full h-2 overflow-hidden">
+                    <div key={i} className="space-y-1">
+                      <div className="flex justify-between text-xs">
+                        <span className="text-[#8A8F9E] font-medium">{r.label}</span>
+                        <span className="text-white font-data font-semibold">{r.pct}%</span>
+                      </div>
+                      <div className="w-full bg-[#181B26] rounded-full h-2 overflow-hidden border border-[#1E2230]">
                         <motion.div
-                          className="bg-indigo-400 h-full rounded-full"
+                          className="bg-gradient-to-r from-indigo-500 to-sky-400 h-full rounded-full"
                           initial={{ width: 0 }}
                           animate={{ width: `${r.pct}%` }}
-                          transition={{ duration: 0.7, delay: i * 0.06, ease: [0.16, 1, 0.3, 1] }}
+                          transition={{ duration: 0.8, delay: i * 0.08 }}
                         />
                       </div>
-                      <span className="text-[#B7BECC] text-[11px] w-8 text-right font-data">{r.pct}%</span>
                     </div>
                   ))}
                 </div>
