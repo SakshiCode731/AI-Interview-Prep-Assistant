@@ -25,6 +25,8 @@ import {
   ArrowRight,
   Flame,
   Award,
+  Flag,
+  Pencil,
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useBookmarks } from '../context/BookmarkContext';
@@ -81,9 +83,10 @@ const CountUp = ({ value, decimals = 0 }) => {
   return <>{decimals ? display.toFixed(decimals) : Math.round(display)}</>;
 };
 
-const ReadinessGauge = ({ score = 0, active = true, size = 160 }) => {
+// Circular gauge used in the right-rail "Readiness breakdown" card.
+const ReadinessGauge = ({ score = 0, active = true, size = 168, icon: Icon = Target }) => {
   const shouldReduceMotion = useReducedMotion();
-  const r = size * 0.4;
+  const r = size * 0.42;
   const cx = size / 2;
   const cy = size / 2;
   const circumference = 2 * Math.PI * r;
@@ -91,15 +94,15 @@ const ReadinessGauge = ({ score = 0, active = true, size = 160 }) => {
   const offset = circumference * (1 - clamped / 100);
 
   return (
-    <div className="relative flex items-center justify-center">
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90">
         <defs>
           <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="100%">
             <stop offset="0%" stopColor="#818CF8" />
-            <stop offset="100%" stopColor="#4F46E5" />
+            <stop offset="100%" stopColor="#6366F1" />
           </linearGradient>
         </defs>
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#1A1D26" strokeWidth={8} />
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="#EEF0FA" strokeWidth={10} />
         {active && (
           <motion.circle
             cx={cx}
@@ -107,7 +110,7 @@ const ReadinessGauge = ({ score = 0, active = true, size = 160 }) => {
             r={r}
             fill="none"
             stroke="url(#gaugeGradient)"
-            strokeWidth={8}
+            strokeWidth={10}
             strokeLinecap="round"
             strokeDasharray={circumference}
             initial={{ strokeDashoffset: circumference }}
@@ -116,12 +119,19 @@ const ReadinessGauge = ({ score = 0, active = true, size = 160 }) => {
           />
         )}
       </svg>
+      {!active && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="w-9 h-9 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-400">
+            <Icon className="w-4 h-4" />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// Legend row used in the right-rail "Statistics" card — colored dot + label +
-// percentage on top, a thin colored progress bar underneath (Fobework style).
+// Legend row used in the right-rail "Readiness breakdown" card — colored dot
+// + label + percentage on top, a thin colored progress bar underneath.
 const LegendBarRow = ({ label, pct, colorClass, dotClass, index }) => (
   <motion.div
     initial={{ opacity: 0, y: 8 }}
@@ -132,11 +142,11 @@ const LegendBarRow = ({ label, pct, colorClass, dotClass, index }) => (
     <div className="flex items-center justify-between text-xs">
       <div className="flex items-center gap-2">
         <span className={`w-2 h-2 rounded-full ${dotClass}`} />
-        <span className="text-[#8A8F9E] font-medium">{label}</span>
+        <span className="text-slate-500 font-medium">{label}</span>
       </div>
-      <span className="text-white font-data font-semibold">{pct}%</span>
+      <span className="text-slate-800 font-semibold">{pct}%</span>
     </div>
-    <div className="w-full bg-[#181B26] rounded-full h-1.5 overflow-hidden border border-[#1E2230]">
+    <div className="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
       <motion.div
         className={`${colorClass} h-full rounded-full`}
         initial={{ width: 0 }}
@@ -227,42 +237,42 @@ const Dashboard = () => {
   ];
 
   const statPills = [
-    { label: 'Readiness score', value: readinessAnalyzed ? readinessScore : null, loading: readinessLoading, suffix: readinessAnalyzed ? '%' : '', icon: Target, path: '/readiness', fallback: '—', sub: readinessAnalyzed ? 'Based on last analysis' : 'Analyze your resume' },
-    { label: 'Questions practiced', value: questionsPracticed, loading: progressLoading, icon: Flame, path: '/progress', fallback: 0, sub: progress && progress.totalQuestionsAttempted > 0 ? 'Keep it up' : 'Start practicing' },
-    { label: 'Avg answer score', value: progress?.avgOverallScore, decimals: 1, suffix: '/10', loading: progressLoading, icon: Award, path: '/answer-evaluator', fallback: '—', sub: progress && progress.totalQuestionsAttempted > 0 ? 'Recent attempts' : 'No attempts yet' },
-    { label: 'Companies saved', value: companiesSaved, loading: false, icon: Bookmark, path: '/bookmarks', fallback: 0, sub: companiesSaved > 0 ? `${companiesSaved} bookmarked` : 'None saved yet' },
+    { label: 'Readiness score', value: readinessAnalyzed ? readinessScore : null, loading: readinessLoading, suffix: readinessAnalyzed ? '%' : '', icon: Target, iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500', path: '/readiness', fallback: '—', sub: readinessAnalyzed ? 'Based on last analysis' : null, cta: !readinessAnalyzed ? 'Analyze your resume' : null },
+    { label: 'Questions practiced', value: questionsPracticed, loading: progressLoading, icon: Flame, iconBg: 'bg-emerald-50', iconColor: 'text-emerald-500', path: '/progress', fallback: 0, sub: 'Keep it up', badge: progress && progress.totalQuestionsAttempted > 0 ? '+4 this week' : null },
+    { label: 'Avg answer score', value: progress?.avgOverallScore, decimals: 1, suffix: '/10', loading: progressLoading, icon: Award, iconBg: 'bg-amber-50', iconColor: 'text-amber-500', path: '/answer-evaluator', fallback: '—', sub: progress && progress.totalQuestionsAttempted > 0 ? 'Recent attempts' : 'No attempts yet' },
+    { label: 'Companies saved', value: companiesSaved, loading: false, icon: Bookmark, iconBg: 'bg-sky-50', iconColor: 'text-sky-500', path: '/bookmarks', fallback: 0, sub: companiesSaved > 0 ? `${companiesSaved} bookmarked` : 'None saved yet' },
   ];
 
   const quickAccess = [
-    { icon: HelpCircle, title: 'Mock interview', desc: 'Fresh questions, timed practice', color: 'from-indigo-600/30 to-indigo-500/5', iconColor: 'text-indigo-400', path: '/mock-interview' },
-    { icon: CheckCircle2, title: 'Answer evaluator', desc: 'Instant AI-scored feedback', color: 'from-emerald-600/30 to-emerald-500/5', iconColor: 'text-emerald-400', path: '/answer-evaluator' },
-    { icon: Cpu, title: 'System design', desc: 'Practice architecture rounds', color: 'from-sky-600/30 to-sky-500/5', iconColor: 'text-sky-400', path: '/system-design' },
-    { icon: Bot, title: 'AI chatbot', desc: 'Ask anything, anytime', color: 'from-amber-600/30 to-amber-500/5', iconColor: 'text-amber-400', path: '/chatbot' },
+    { icon: HelpCircle, title: 'Mock interview', desc: 'Fresh questions, timed practice', iconBg: 'bg-indigo-50', iconColor: 'text-indigo-500', path: '/mock-interview', linkColor: 'text-indigo-500' },
+    { icon: CheckCircle2, title: 'Answer evaluator', desc: 'Instant AI-scored feedback', iconBg: 'bg-emerald-50', iconColor: 'text-emerald-500', path: '/answer-evaluator', linkColor: 'text-emerald-500' },
+    { icon: Cpu, title: 'System design', desc: 'Practice architecture rounds', iconBg: 'bg-violet-50', iconColor: 'text-violet-500', path: '/system-design', linkColor: 'text-violet-500' },
+    { icon: Bot, title: 'AI chatbot', desc: 'Ask anything, anytime', iconBg: 'bg-sky-50', iconColor: 'text-sky-500', path: '/chatbot', linkColor: 'text-sky-500' },
   ];
 
   return (
-    <div className="min-h-screen bg-[#0A0B0E] text-[#E2E8F0] flex font-sans antialiased selection:bg-indigo-500/30">
+    <div className="min-h-screen bg-gradient-to-b from-[#F7F8FC] to-[#EEF0FA] text-slate-800 flex font-sans antialiased selection:bg-indigo-200/50">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         .font-sans { font-family: 'Plus Jakarta Sans', sans-serif; }
-        .font-data { font-family: 'JetBrains Mono', monospace; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
       `}</style>
 
       {/* Sidebar */}
-      <aside className="w-64 bg-[#0E1017] border-r border-[#1E2230] flex flex-col flex-shrink-0 h-screen sticky top-0 z-30">
-        <div className="h-16 flex items-center gap-3 px-6 border-b border-[#1E2230] flex-shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-indigo-400 flex items-center justify-center text-white text-sm font-bold shadow-lg shadow-indigo-500/20">
-            P
+      <aside className="w-64 bg-white border-r border-slate-100 flex flex-col flex-shrink-0 h-screen sticky top-0 z-30">
+        <div className="h-16 flex items-center gap-2.5 px-6 border-b border-slate-100 flex-shrink-0">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-500 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+            <Sparkles className="w-4 h-4" />
           </div>
-          <span className="font-bold text-base tracking-tight text-white">PrepAI</span>
+          <span className="font-extrabold text-base tracking-tight text-slate-900">Prep AI</span>
+          <span className="text-[9px] font-bold text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded-md tracking-wider">PRO</span>
         </div>
 
         <nav className="flex-1 overflow-y-auto no-scrollbar px-3 py-4 space-y-6">
           {navItems.map((group, gi) => (
             <div key={gi}>
-              <p className="text-[10px] text-[#525866] uppercase font-bold tracking-widest mb-2 px-3">{group.section}</p>
+              <p className="text-[10px] text-slate-400 uppercase font-bold tracking-widest mb-2 px-3">{group.section}</p>
               <div className="space-y-1">
                 {group.items.map((item, ii) => {
                   const Icon = item.icon;
@@ -272,14 +282,14 @@ const Dashboard = () => {
                       onClick={() => item.path && navigate(item.path)}
                       className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-[13px] font-medium transition-all duration-150 group ${
                         item.active
-                          ? 'bg-indigo-600/15 text-indigo-300 border border-indigo-500/20'
-                          : 'text-[#8A8F9E] hover:text-white hover:bg-[#161926]'
+                          ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
+                          : 'text-slate-500 hover:text-slate-900 hover:bg-slate-50'
                       }`}
                     >
-                      <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${item.active ? 'text-indigo-400' : 'text-[#646A7E]'}`} />
+                      <Icon className={`w-4 h-4 transition-transform group-hover:scale-110 ${item.active ? 'text-white' : 'text-slate-400'}`} />
                       <span className="flex-1 text-left truncate">{item.label}</span>
                       {item.badge && (
-                        <span className="text-[10px] bg-indigo-500/20 text-indigo-300 px-2 py-0.5 rounded-full font-data font-semibold">
+                        <span className={`text-[10px] px-2 py-0.5 rounded-full font-semibold ${item.active ? 'bg-white/20 text-white' : 'bg-indigo-50 text-indigo-600'}`}>
                           {item.badge}
                         </span>
                       )}
@@ -291,18 +301,19 @@ const Dashboard = () => {
           ))}
         </nav>
 
-        <div className="border-t border-[#1E2230] p-3">
+        <div className="border-t border-slate-100 p-3">
           <div className="relative">
             <button
               onClick={() => setShowProfile(!showProfile)}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-[#161926] transition text-left"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-slate-50 transition text-left"
             >
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-xs font-bold text-white shadow-md">
+              <div className="relative w-8 h-8 rounded-full bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-xs font-bold text-white shadow-md">
                 {user?.name?.charAt(0).toUpperCase() || 'U'}
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-xs font-semibold text-white truncate">{user?.name || 'User'}</p>
-                <p className="text-[10px] text-[#525866] truncate">{user?.email}</p>
+                <p className="text-xs font-semibold text-slate-800 truncate">{user?.name || 'User'}</p>
+                <p className="text-[10px] text-slate-400 truncate">{user?.email}</p>
               </div>
             </button>
 
@@ -312,30 +323,30 @@ const Dashboard = () => {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 8 }}
-                  className="absolute left-0 bottom-full mb-2 w-60 bg-[#12141D] border border-[#1E2230] rounded-2xl shadow-2xl z-50 overflow-hidden"
+                  className="absolute left-0 bottom-full mb-2 w-60 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden"
                 >
-                  <div className="grid grid-cols-3 border-b border-[#1E2230] text-center py-2.5 bg-[#161926]/50 font-data">
+                  <div className="grid grid-cols-3 border-b border-slate-100 text-center py-2.5 bg-slate-50/60">
                     <div>
-                      <p className="text-xs font-bold text-white">{readinessLoading ? '···' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
-                      <p className="text-[9px] text-[#525866] font-sans">Readiness</p>
+                      <p className="text-xs font-bold text-slate-800">{readinessLoading ? '···' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
+                      <p className="text-[9px] text-slate-400">Readiness</p>
                     </div>
-                    <div className="border-x border-[#1E2230]">
-                      <p className="text-xs font-bold text-white">{progressLoading ? '···' : (questionsPracticed ?? 0)}</p>
-                      <p className="text-[9px] text-[#525866] font-sans">Practiced</p>
+                    <div className="border-x border-slate-100">
+                      <p className="text-xs font-bold text-slate-800">{progressLoading ? '···' : (questionsPracticed ?? 0)}</p>
+                      <p className="text-[9px] text-slate-400">Practiced</p>
                     </div>
                     <div>
-                      <p className="text-xs font-bold text-white">{companiesSaved}</p>
-                      <p className="text-[9px] text-[#525866] font-sans">Saved</p>
+                      <p className="text-xs font-bold text-slate-800">{companiesSaved}</p>
+                      <p className="text-[9px] text-slate-400">Saved</p>
                     </div>
                   </div>
                   <div className="p-1.5 space-y-1">
-                    <button onClick={() => { setShowProfile(false); navigate('/resume'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-[#8A8F9E] hover:bg-[#1A1D2B] hover:text-white rounded-xl transition text-left">
+                    <button onClick={() => { setShowProfile(false); navigate('/resume'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition text-left">
                       <FileText className="w-3.5 h-3.5" /> My Resume
                     </button>
-                    <button onClick={() => { setShowProfile(false); navigate('/readiness'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-[#8A8F9E] hover:bg-[#1A1D2B] hover:text-white rounded-xl transition text-left">
+                    <button onClick={() => { setShowProfile(false); navigate('/readiness'); }} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-slate-500 hover:bg-slate-50 hover:text-slate-900 rounded-xl transition text-left">
                       <Target className="w-3.5 h-3.5" /> Readiness Score
                     </button>
-                    <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-400 hover:bg-rose-500/10 rounded-xl transition text-left font-medium">
+                    <button onClick={handleLogout} className="w-full flex items-center gap-2.5 px-3 py-2 text-xs text-rose-500 hover:bg-rose-50 rounded-xl transition text-left font-medium">
                       <LogOut className="w-3.5 h-3.5" /> Log out
                     </button>
                   </div>
@@ -349,15 +360,15 @@ const Dashboard = () => {
 
       {/* Main Workspace */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Top bar — breadcrumb style, matches reference */}
-        <header className="h-16 border-b border-[#1E2230] px-8 flex items-center justify-between sticky top-0 bg-[#0A0B0E]/80 backdrop-blur-xl z-20">
-          <p className="text-xs text-[#8A8F9E] hidden md:block">
-            Dashboard <span className="text-[#3A3F4E]">/</span> <span className="text-white font-medium">Overview</span>
+        {/* Top bar */}
+        <header className="h-16 border-b border-slate-100 px-8 flex items-center justify-between sticky top-0 bg-white/70 backdrop-blur-xl z-20">
+          <p className="text-xs text-slate-400 hidden md:block">
+            Dashboard <span className="text-slate-300">/</span> <span className="text-slate-700 font-semibold">Overview</span>
           </p>
 
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#525866]" />
+              <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
                 placeholder="Search companies, topics, guides..."
@@ -369,14 +380,14 @@ const Dashboard = () => {
                     setSearchQuery('');
                   }
                 }}
-                className="w-64 bg-[#12141D] border border-[#1E2230] rounded-xl pl-9 pr-4 py-1.5 text-xs text-white placeholder-[#525866] focus:outline-none focus:border-indigo-500 transition"
+                className="w-64 bg-slate-50 border border-slate-100 rounded-xl pl-9 pr-4 py-1.5 text-xs text-slate-700 placeholder-slate-400 focus:outline-none focus:border-indigo-300 focus:bg-white transition"
               />
             </div>
 
             <div className="relative">
               <button
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="p-2 rounded-xl bg-[#12141D] border border-[#1E2230] text-[#8A8F9E] hover:text-white transition relative"
+                className="p-2 rounded-xl bg-slate-50 border border-slate-100 text-slate-500 hover:text-slate-900 transition relative"
               >
                 <Bell className="w-4 h-4" />
                 {notifications.some((n) => n.unread) && (
@@ -390,24 +401,28 @@ const Dashboard = () => {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.15 }}
-                    className="absolute right-0 top-11 w-80 bg-[#12141D] border border-[#1E2230] rounded-2xl shadow-2xl z-50 overflow-hidden"
+                    className="absolute right-0 top-11 w-80 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 overflow-hidden"
                   >
-                    <div className="px-4 py-3 border-b border-[#1E2230]">
-                      <p className="font-medium text-white text-[13px]">Notifications</p>
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <p className="font-semibold text-slate-800 text-[13px]">Notifications</p>
                     </div>
                     <div className="px-4 py-7 text-center">
-                      <p className="text-[#8A8F9E] text-[13px]">No notifications yet</p>
-                      <p className="text-[#525866] text-[11px] mt-1">We'll let you know when there's something new</p>
+                      <p className="text-slate-500 text-[13px]">No notifications yet</p>
+                      <p className="text-slate-400 text-[11px] mt-1">We'll let you know when there's something new</p>
                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
               {showNotifications && <div className="fixed inset-0 z-40" onClick={() => setShowNotifications(false)} />}
             </div>
+
+            <button className="w-9 h-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 hover:text-slate-900 transition">
+              <Users className="w-4 h-4" />
+            </button>
           </div>
         </header>
 
-        {/* Body: main content + right rail (Fobework layout) */}
+        {/* Body: main content + right rail */}
         <motion.main
           variants={containerVariants}
           initial="hidden"
@@ -417,13 +432,13 @@ const Dashboard = () => {
           {/* Main column */}
           <div className="flex-1 min-w-0 space-y-6">
             <motion.div variants={itemVariants}>
-              <h1 className="text-2xl font-bold text-white tracking-tight">
-                {getGreeting()}, <span className="text-indigo-400">{user?.name?.split(' ')[0] || 'there'}</span> 👋
+              <h1 className="text-[26px] font-extrabold text-slate-900 tracking-tight">
+                {getGreeting()}, <span className="text-indigo-600">{user?.name?.split(' ')[0] || 'there'}</span> 👋
               </h1>
-              <p className="text-xs text-[#8A8F9E] mt-1">Here is your active interview readiness & practice snapshot.</p>
+              <p className="text-[13px] text-slate-500 mt-1">Here is your active interview readiness & practice snapshot.</p>
             </motion.div>
 
-            {/* Stat pills — "My school stats" equivalent */}
+            {/* Stat cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               {statPills.map((s, i) => {
                 const Icon = s.icon;
@@ -433,12 +448,15 @@ const Dashboard = () => {
                     variants={itemVariants}
                     onClick={() => s.path && navigate(s.path)}
                     whileHover={{ y: -3 }}
-                    className="bg-[#12141D] border border-[#1E2230] hover:border-indigo-500/40 rounded-2xl p-4 cursor-pointer transition-colors"
+                    className="bg-white border border-slate-100 hover:border-indigo-200 rounded-2xl p-4 cursor-pointer transition-colors shadow-sm shadow-slate-100"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-[#161926] border border-[#1E2230] flex items-center justify-center text-indigo-400 mb-3">
-                      <Icon className="w-4 h-4" />
+                    <div className="flex items-center justify-between mb-3">
+                      <p className="text-[13px] text-slate-500 font-medium">{s.label}</p>
+                      <div className={`w-8 h-8 rounded-full ${s.iconBg} flex items-center justify-center ${s.iconColor}`}>
+                        <Icon className="w-4 h-4" />
+                      </div>
                     </div>
-                    <p className="text-xl font-bold font-data text-white leading-none">
+                    <p className="text-[26px] font-extrabold text-slate-900 leading-none">
                       {s.loading ? (
                         '···'
                       ) : s.value === null || s.value === undefined ? (
@@ -446,47 +464,58 @@ const Dashboard = () => {
                       ) : (
                         <>
                           <CountUp value={s.value} decimals={s.decimals || 0} />
-                          {s.suffix && <span className="text-xs text-[#525866] font-normal">{s.suffix}</span>}
+                          {s.suffix && <span className="text-sm text-slate-400 font-semibold">{s.suffix}</span>}
                         </>
                       )}
                     </p>
-                    <p className="text-[11px] text-[#8A8F9E] mt-1.5">{s.label}</p>
-                    {s.sub && <p className="text-[10px] text-[#525866] mt-1">{s.sub}</p>}
+                    {s.badge && (
+                      <span className="inline-block mt-2 text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
+                        {s.badge}
+                      </span>
+                    )}
+                    {s.cta ? (
+                      <p className="text-[11px] text-indigo-500 font-semibold mt-2">{s.cta}</p>
+                    ) : (
+                      s.sub && <p className="text-[11px] text-slate-400 mt-2">{s.sub}</p>
+                    )}
                   </motion.div>
                 );
               })}
             </div>
 
-            {/* CTA banner — "Career Guide tools" equivalent */}
+            {/* CTA banner */}
             <motion.div
               variants={itemVariants}
-              className="bg-gradient-to-r from-indigo-600/15 via-[#12141D] to-[#12141D] border border-[#1E2230] rounded-2xl p-5 flex items-center justify-between gap-4 flex-wrap"
+              className="relative overflow-hidden bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 flex items-center justify-between gap-4 flex-wrap shadow-lg shadow-indigo-200"
             >
-              <div className="flex items-center gap-4">
-                <div className="w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center text-indigo-400 flex-shrink-0">
+              <div className="flex items-center gap-4 relative z-10">
+                <div className="w-11 h-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-white flex-shrink-0">
                   {readinessAnalyzed ? <BarChart2 className="w-5 h-5" /> : <Sparkles className="w-5 h-5" />}
                 </div>
                 <div>
-                  <p className="font-semibold text-sm text-white">
+                  <p className="font-bold text-[15px] text-white">
                     {readinessAnalyzed ? 'Your resume has been analyzed' : 'Unlock your full readiness breakdown'}
                   </p>
-                  <p className="text-xs text-[#8A8F9E] mt-0.5">
+                  <p className="text-xs text-indigo-100 mt-1">
                     {readinessAnalyzed ? 'Revisit or re-run the analysis anytime for updated results.' : 'Upload and analyze your resume to see a personalized readiness score.'}
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => navigate('/readiness')}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white transition flex-shrink-0 flex items-center gap-1.5"
+                className="relative z-10 px-4 py-2.5 rounded-xl text-xs font-bold bg-white hover:bg-indigo-50 text-indigo-600 transition flex-shrink-0 flex items-center gap-1.5"
               >
                 {readinessAnalyzed ? 'Re-analyze' : 'Go to Readiness'} <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </motion.div>
 
-            {/* Quick access — "My Enrolment" equivalent */}
+            {/* Quick access */}
             <motion.div variants={itemVariants}>
               <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-bold text-white">Quick access</h3>
+                <h3 className="text-sm font-bold text-slate-800">Quick access</h3>
+                <span className="text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500" /> 4 modules available
+                </span>
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 {quickAccess.map((q, i) => {
@@ -497,17 +526,15 @@ const Dashboard = () => {
                       variants={itemVariants}
                       onClick={() => navigate(q.path)}
                       whileHover={{ y: -4 }}
-                      className="bg-[#12141D] border border-[#1E2230] hover:border-[#2B3044] rounded-2xl overflow-hidden cursor-pointer transition"
+                      className="bg-white border border-slate-100 hover:border-slate-200 rounded-2xl p-5 cursor-pointer transition shadow-sm shadow-slate-100"
                     >
-                      <div className={`h-16 flex items-center justify-center bg-gradient-to-br ${q.color}`}>
-                        <Icon className={`w-6 h-6 ${q.iconColor}`} />
+                      <div className={`w-11 h-11 rounded-xl ${q.iconBg} flex items-center justify-center ${q.iconColor} mb-4`}>
+                        <Icon className="w-5 h-5" />
                       </div>
-                      <div className="p-4">
-                        <p className="text-sm font-semibold text-white">{q.title}</p>
-                        <p className="text-[11px] text-[#8A8F9E] mt-1">{q.desc}</p>
-                        <div className={`flex items-center gap-1 mt-3 text-xs font-medium ${q.iconColor}`}>
-                          Open <ChevronRight className="w-3.5 h-3.5" />
-                        </div>
+                      <p className="text-[14px] font-bold text-slate-900">{q.title}</p>
+                      <p className="text-[11px] text-slate-500 mt-1 leading-snug">{q.desc}</p>
+                      <div className={`flex items-center gap-1 mt-4 text-xs font-semibold ${q.linkColor}`}>
+                        Open <ChevronRight className="w-3.5 h-3.5" />
                       </div>
                     </motion.div>
                   );
@@ -515,24 +542,24 @@ const Dashboard = () => {
               </div>
             </motion.div>
 
-            {/* Skill gap — "Assignments" list equivalent */}
-            <motion.div variants={itemVariants} className="bg-[#12141D] border border-[#1E2230] rounded-2xl p-6">
+            {/* Skill gap analysis */}
+            <motion.div variants={itemVariants} className="bg-white border border-slate-100 rounded-2xl p-6 shadow-sm shadow-slate-100">
               <div className="flex items-center justify-between mb-5">
                 <div>
-                  <h3 className="text-sm font-bold text-white">Skill gap analysis</h3>
-                  <p className="text-[11px] text-[#525866]">Performance breakdown across topics</p>
+                  <h3 className="text-sm font-bold text-slate-800">Skill gap analysis</h3>
+                  <p className="text-[11px] text-slate-400">Performance breakdown across topics</p>
                 </div>
-                <button onClick={() => navigate('/progress')} className="text-xs text-indigo-400 hover:underline font-semibold flex items-center gap-1">
+                <button onClick={() => navigate('/progress')} className="text-xs text-indigo-500 hover:underline font-semibold flex items-center gap-1">
                   View report <ChevronRight className="w-3 h-3" />
                 </button>
               </div>
 
               {progressLoading ? (
-                <div className="py-8 text-center text-xs text-[#525866]">Loading skills data...</div>
+                <div className="py-8 text-center text-xs text-slate-400">Loading skills data...</div>
               ) : skills.length === 0 ? (
-                <div className="py-8 text-center bg-[#161926]/40 rounded-xl border border-[#1E2230]">
-                  <p className="text-xs text-[#8A8F9E] font-medium">No practice history available</p>
-                  <p className="text-[11px] text-[#525866] mt-1">Complete mock tests to build your skill profile</p>
+                <div className="py-8 text-center bg-slate-50/60 rounded-xl border border-slate-100">
+                  <p className="text-xs text-slate-500 font-medium">No practice history available</p>
+                  <p className="text-[11px] text-slate-400 mt-1">Complete mock tests to build your skill profile</p>
                 </div>
               ) : (
                 <div className="space-y-1">
@@ -542,13 +569,13 @@ const Dashboard = () => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ duration: 0.3, delay: i * 0.06 }}
-                      className="flex items-center gap-3 py-2.5 border-b border-[#1E2230] last:border-b-0"
+                      className="flex items-center gap-3 py-3 border-b border-slate-50 last:border-b-0"
                     >
-                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.color} bg-opacity-20 flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0`}>
+                      <div className={`w-8 h-8 rounded-lg bg-gradient-to-br ${s.color} bg-opacity-15 flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0`}>
                         {s.name.charAt(0).toUpperCase()}
                       </div>
-                      <span className="text-xs text-[#8A8F9E] font-medium w-28 flex-shrink-0 truncate">{s.name}</span>
-                      <div className="flex-1 bg-[#181B26] rounded-full h-1.5 overflow-hidden border border-[#1E2230]">
+                      <span className="text-xs text-slate-600 font-medium w-28 flex-shrink-0 truncate">{s.name}</span>
+                      <div className="flex-1 bg-slate-100 rounded-full h-2 overflow-hidden">
                         <motion.div
                           className={`bg-gradient-to-r ${s.color} h-full rounded-full`}
                           initial={{ width: 0 }}
@@ -556,7 +583,7 @@ const Dashboard = () => {
                           transition={{ duration: 0.8, delay: 0.1 + i * 0.08 }}
                         />
                       </div>
-                      <span className="text-xs text-white font-data font-semibold w-10 text-right flex-shrink-0">{s.pct}%</span>
+                      <span className="text-xs text-slate-700 font-bold w-10 text-right flex-shrink-0">{s.pct}%</span>
                     </motion.div>
                   ))}
                 </div>
@@ -564,51 +591,68 @@ const Dashboard = () => {
             </motion.div>
           </div>
 
-          {/* Right rail — "Student Profile" + "Statistics" equivalent */}
+          {/* Right rail */}
           <aside className="w-full xl:w-[300px] flex-shrink-0 space-y-6">
             {/* Profile card */}
-            <motion.div variants={itemVariants} className="bg-[#12141D] border border-[#1E2230] rounded-2xl p-5 text-center">
-              <p className="text-xs font-bold text-white mb-4 text-left">Your profile</p>
-              <div className="w-16 h-16 rounded-full mx-auto bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-indigo-500/20">
-                {user?.name?.charAt(0).toUpperCase() || 'U'}
+            <motion.div variants={itemVariants} className="bg-white border border-slate-100 rounded-2xl p-5 text-center shadow-sm shadow-slate-100">
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-xs font-bold text-slate-800 text-left">Your profile</p>
+                <button className="text-slate-300 hover:text-slate-500 transition">
+                  <Settings className="w-3.5 h-3.5" />
+                </button>
               </div>
-              <p className="text-sm font-semibold text-white mt-3">{user?.name || 'User'}</p>
-              <p className="text-[11px] text-[#525866]">{user?.email}</p>
+              <div className="relative w-16 h-16 rounded-full mx-auto mt-2 bg-gradient-to-tr from-indigo-500 to-violet-500 flex items-center justify-center text-2xl font-bold text-white shadow-lg shadow-indigo-200">
+                {user?.name?.charAt(0).toUpperCase() || 'U'}
+                <span className="absolute bottom-0.5 right-0.5 w-3.5 h-3.5 bg-emerald-400 border-2 border-white rounded-full" />
+              </div>
+              <p className="text-sm font-bold text-slate-900 mt-3">{user?.name || 'User'}</p>
+              <p className="text-[11px] text-slate-400">{user?.email}</p>
+              <span className="inline-flex items-center gap-1 mt-2 text-[10px] font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full">
+                <Award className="w-3 h-3" /> PrepAI Pro Candidate
+              </span>
 
-              <div className="grid grid-cols-3 mt-5 pt-4 border-t border-[#1E2230] font-data">
+              <div className="grid grid-cols-3 mt-5 pt-4 border-t border-slate-100">
                 <div>
-                  <p className="text-sm font-bold text-white">{readinessLoading ? '···' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
-                  <p className="text-[9px] text-[#525866] font-sans mt-0.5">Readiness</p>
+                  <p className="text-sm font-bold text-slate-900">{readinessLoading ? '···' : (readinessAnalyzed ? `${readinessScore}%` : '—')}</p>
+                  <p className="text-[9px] text-slate-400 mt-0.5">Readiness</p>
                 </div>
-                <div className="border-x border-[#1E2230]">
-                  <p className="text-sm font-bold text-white">{progressLoading ? '···' : (questionsPracticed ?? 0)}</p>
-                  <p className="text-[9px] text-[#525866] font-sans mt-0.5">Practiced</p>
+                <div className="border-x border-slate-100">
+                  <p className="text-sm font-bold text-slate-900">{progressLoading ? '···' : (questionsPracticed ?? 0)}</p>
+                  <p className="text-[9px] text-slate-400 mt-0.5">Practiced</p>
                 </div>
                 <div>
-                  <p className="text-sm font-bold text-white">{companiesSaved}</p>
-                  <p className="text-[9px] text-[#525866] font-sans mt-0.5">Saved</p>
+                  <p className="text-sm font-bold text-slate-900">{companiesSaved}</p>
+                  <p className="text-[9px] text-slate-400 mt-0.5">Saved</p>
                 </div>
               </div>
             </motion.div>
 
-            {/* Statistics / readiness donut card */}
-            <motion.div variants={itemVariants} className="bg-[#12141D] border border-[#1E2230] rounded-2xl p-5">
+            {/* Readiness breakdown / gauge card */}
+            <motion.div variants={itemVariants} className="bg-white border border-slate-100 rounded-2xl p-5 shadow-sm shadow-slate-100">
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-bold text-white">Readiness breakdown</h3>
-                <button onClick={() => navigate('/readiness')} className="text-xs text-indigo-400 hover:underline font-semibold">
+                <h3 className="text-sm font-bold text-slate-800">Readiness breakdown</h3>
+                <button onClick={() => navigate('/readiness')} className="text-xs text-indigo-500 hover:underline font-semibold">
                   {readinessAnalyzed ? 'Re-analyze' : 'Analyze'}
                 </button>
               </div>
 
               {readinessLoading ? (
-                <div className="py-8 text-center text-xs text-[#525866]">Calculating metrics...</div>
+                <div className="py-8 text-center text-xs text-slate-400">Calculating metrics...</div>
               ) : !readinessAnalyzed ? (
-                <div className="py-4 text-center">
-                  <ReadinessGauge score={0} active={false} size={128} />
-                  <p className="text-xs text-[#8A8F9E] font-medium mt-4">Resume analysis required</p>
+                <div className="py-2 text-center">
+                  <div className="relative flex items-center justify-center py-2">
+                    <ReadinessGauge score={0} active={false} size={140} />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none">
+                      <span className="text-[10px] tracking-widest text-slate-300 font-bold mt-14">SCORE</span>
+                      <span className="text-lg font-extrabold text-slate-300 mt-0.5">—</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-500 font-medium mt-3 max-w-[200px] mx-auto leading-snug">
+                    Resume analysis required to benchmark your interview readiness.
+                  </p>
                   <button
                     onClick={() => navigate('/readiness')}
-                    className="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold rounded-xl transition"
+                    className="mt-4 w-full px-4 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-xl transition flex items-center justify-center gap-1.5"
                   >
                     Upload & Calculate
                   </button>
@@ -616,12 +660,12 @@ const Dashboard = () => {
               ) : (
                 <>
                   <div className="relative flex items-center justify-center py-2">
-                    <ReadinessGauge score={readinessScore} active={true} size={128} />
+                    <ReadinessGauge score={readinessScore} active={true} size={140} />
                     <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                      <span className="text-2xl font-extrabold font-data text-white">
-                        <CountUp value={readinessScore} /><span className="text-xs text-indigo-400 ml-0.5">%</span>
+                      <span className="text-2xl font-extrabold text-slate-900">
+                        <CountUp value={readinessScore} /><span className="text-xs text-indigo-500 ml-0.5">%</span>
                       </span>
-                      <span className="text-[10px] text-[#8A8F9E] mt-1">{getReadinessLabel(readinessScore)}</span>
+                      <span className="text-[10px] text-slate-400 mt-1">{getReadinessLabel(readinessScore)}</span>
                     </div>
                   </div>
                   <div className="mt-5 space-y-3.5">
@@ -631,6 +675,20 @@ const Dashboard = () => {
                   </div>
                 </>
               )}
+            </motion.div>
+
+            {/* Target role card */}
+            <motion.div variants={itemVariants} className="bg-white border border-slate-100 rounded-2xl p-4 flex items-start gap-3 shadow-sm shadow-slate-100">
+              <div className="w-9 h-9 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-500 flex-shrink-0">
+                <Flag className="w-4 h-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold text-slate-800">Target Role: Senior Frontend</p>
+                <p className="text-[11px] text-slate-400 mt-0.5">Goal: 85% Readiness by Oct 30</p>
+              </div>
+              <button className="text-slate-300 hover:text-indigo-500 transition flex-shrink-0">
+                <Pencil className="w-3.5 h-3.5" />
+              </button>
             </motion.div>
           </aside>
         </motion.main>
