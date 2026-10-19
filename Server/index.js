@@ -43,6 +43,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/system-design', systemDesignRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/agent', require('./routes/agent'));
 
 app.get('/', (req, res) => {
   res.send('API is running...');
