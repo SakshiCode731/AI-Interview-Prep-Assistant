@@ -1,5 +1,6 @@
 const { StateGraph, Annotation, START, END } = require('@langchain/langgraph');
 const { groq: client, GROQ_MODEL, GROQ_MODEL_EVALUATOR } = require('../config/groqConfig');
+const { retrieveCompanyContext, buildCompanyPrompt } = require('../utils/companyRetrieval');
 
 // ---------- helpers ----------
 
@@ -45,6 +46,7 @@ const AgentState = Annotation.Root({
   intent: Annotation(),
   args: Annotation(),
   toolResult: Annotation(),
+  companyContext: Annotation(), // NEW: verified company data (retrieval result)
   agentUsed: Annotation(),
   reply: Annotation(),
 });
@@ -67,7 +69,7 @@ Respond in JSON only:
 Rules:
 - generate_questions: user wants interview questions. args: {"jobRole":"...","difficulty":"easy|medium|hard","numberOfQuestions":number}
 - evaluate_answer: user gives a question and their answer to be scored. args: {"jobRole":"...","question":"...","userAnswer":"..."}
-- chat: anything else (advice, explanations, greetings). args: {}
+- chat: anything else (advice, explanations, greetings, company questions). args: {}
 Only include args you can find in the conversation.`
         },
         ...state.history.slice(-6),
@@ -113,10 +115,29 @@ async function evaluatorNode(state) {
   }
 }
 
+// NEW — Knowledge agent: handles general chat.
+// If the message names a company in our DB, it retrieves verified data (company agent);
+// otherwise it acts as the general interview coach.
+async function knowledgeNode(state) {
+  try {
+    const ctx = await retrieveCompanyContext(state.userMessage);
+    if (ctx) {
+      return { companyContext: ctx, agentUsed: 'company' };
+    }
+  } catch (err) {
+    console.error('Company retrieval failed, continuing as coach:', err.message);
+  }
+  return { agentUsed: 'coach' };
+}
+
 // Responder: writes the final natural-language reply
 async function responderNode(state) {
   let system =
     'You are a helpful interview prep assistant. Always respond in clear, natural, well-formatted language for a chat UI — never output raw JSON or code blocks. Use markdown headings, bold text, and tables where helpful.';
+
+  if (state.companyContext) {
+    system += buildCompanyPrompt(state.companyContext);
+  }
 
   if (state.toolResult) {
     system += `\n\nThe ${state.agentUsed} agent produced this result. Present it clearly to the user (if it contains an error, explain what is missing and ask for it):\n${JSON.stringify(state.toolResult)}`;
@@ -139,7 +160,7 @@ async function responderNode(state) {
 function routeByIntent(state) {
   if (state.intent === 'generate_questions') return 'interviewer';
   if (state.intent === 'evaluate_answer') return 'evaluator';
-  return 'responder';
+  return 'knowledge';
 }
 
 // ---------- build the graph ----------
@@ -148,15 +169,17 @@ const workflow = new StateGraph(AgentState)
   .addNode('router', routerNode)
   .addNode('interviewer', interviewerNode)
   .addNode('evaluator', evaluatorNode)
+  .addNode('knowledge', knowledgeNode)
   .addNode('responder', responderNode)
   .addEdge(START, 'router')
   .addConditionalEdges('router', routeByIntent, {
     interviewer: 'interviewer',
     evaluator: 'evaluator',
-    responder: 'responder',
+    knowledge: 'knowledge',
   })
   .addEdge('interviewer', 'responder')
   .addEdge('evaluator', 'responder')
+  .addEdge('knowledge', 'responder')
   .addEdge('responder', END);
 
 const agentGraph = workflow.compile();
