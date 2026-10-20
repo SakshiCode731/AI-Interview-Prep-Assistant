@@ -25,7 +25,7 @@ router.post('/agent/chat', protect, aiLimiter, async (req, res) => {
       userMessage: message,
     });
 
-    res.json(result); // { reply, sessionId }
+    res.json(result); // { reply, sessionId, agent, grounded, groundedCompany }
   } catch (err) {
     console.error('Agent error:', err);
     res.status(500).json({ error: 'Something went wrong', details: err.message });

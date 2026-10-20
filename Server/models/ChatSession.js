@@ -21,6 +21,16 @@ const messageSchema = new mongoose.Schema(
       type: [mongoose.Schema.Types.Mixed], // sirf 'assistant' role messages ke liye, jab tool call hua ho
       default: undefined,
     },
+    // Multi-agent badge ke liye (sirf 'assistant' messages mein use hote hain)
+    agent: {
+      type: String, // interviewer / evaluator / company / coach
+    },
+    grounded: {
+      type: Boolean,
+    },
+    groundedCompany: {
+      type: String,
+    },
   },
   { timestamps: true }
 );

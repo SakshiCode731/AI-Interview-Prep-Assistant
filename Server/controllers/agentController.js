@@ -29,11 +29,27 @@ async function runAgent({ userId, sessionId, userMessage }) {
 
   console.log(`✅ Agent used: ${result.agentUsed || 'responder only'}`);
 
+  const agent = result.agentUsed || null;
+  const grounded = !!result.companyContext;
+  const groundedCompany = result.companyContext?.name || null;
+
   session.messages.push({ role: 'user', content: userMessage });
-  session.messages.push({ role: 'assistant', content: result.reply });
+  session.messages.push({
+    role: 'assistant',
+    content: result.reply,
+    agent,
+    grounded,
+    groundedCompany,
+  });
   await session.save();
 
-  return { reply: result.reply, sessionId: session._id };
+  return {
+    reply: result.reply,
+    sessionId: session._id,
+    agent,
+    grounded,
+    groundedCompany,
+  };
 }
 
 // --- List all sessions for a user ---
@@ -63,7 +79,13 @@ async function getSession(userId, sessionId) {
 
   const displayMessages = session.messages
     .filter((m) => m.role === 'user' || m.role === 'assistant')
-    .map((m) => ({ role: m.role, content: m.content }));
+    .map((m) => ({
+      role: m.role,
+      content: m.content,
+      agent: m.agent,
+      grounded: m.grounded,
+      groundedCompany: m.groundedCompany,
+    }));
 
   return { sessionId: session._id, title: session.title, messages: displayMessages };
 }
