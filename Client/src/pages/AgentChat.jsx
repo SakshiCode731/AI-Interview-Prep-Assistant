@@ -9,6 +9,23 @@ const WELCOME_MESSAGE = {
 
 const MAX_INPUT_LENGTH = 4000;
 
+// Backend ke agentUsed value ka display naam
+const AGENT_LABELS = {
+  interviewer: 'Interviewer Agent',
+  evaluator: 'Evaluator Agent',
+  company: 'Company Knowledge Agent',
+  coach: 'Coach Agent',
+};
+
+// XSS se bachne ke liye: AI ke text mein HTML characters ko safe bana do
+const escapeHtml = (str) =>
+  String(str ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 const getErrorMessage = (err) => {
   if (!err.response) {
     return '⚠️ Cannot reach the server. Please check your connection and try again.';
@@ -98,7 +115,8 @@ const AgentChat = () => {
   };
 
   const formatMessage = (text) => {
-    const lines = text.split('\n');
+    // XSS fix: pehle poore text ko escape karo, phir markdown ko HTML mein badlo
+    const lines = escapeHtml(text).split('\n');
     let html = '';
     let inTable = false;
     let tableRows = [];
@@ -144,12 +162,21 @@ const AgentChat = () => {
         inTable = false;
       }
 
+      // Headings: sabse lamba pattern pehle check karo (####, ###, ##, #)
       if (/^####\s+/.test(trimmed)) {
         html += `<h4 class="text-sm font-bold text-purple-300 mt-3 mb-1">${inlineFormat(trimmed.replace(/^####\s+/, ''))}</h4>`;
         return;
       }
       if (/^###\s+/.test(trimmed)) {
         html += `<h3 class="text-base font-bold text-purple-300 mt-3 mb-1">${inlineFormat(trimmed.replace(/^###\s+/, ''))}</h3>`;
+        return;
+      }
+      if (/^##\s+/.test(trimmed)) {
+        html += `<h2 class="text-lg font-bold text-purple-300 mt-3 mb-1">${inlineFormat(trimmed.replace(/^##\s+/, ''))}</h2>`;
+        return;
+      }
+      if (/^#\s+/.test(trimmed)) {
+        html += `<h1 class="text-xl font-bold text-purple-300 mt-3 mb-1">${inlineFormat(trimmed.replace(/^#\s+/, ''))}</h1>`;
         return;
       }
 
@@ -192,7 +219,16 @@ const AgentChat = () => {
 
     try {
       const data = await sendAgentMessage(trimmed, sessionId);
-      setMessages((prev) => [...prev, { role: 'assistant', content: data.reply }]);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: data.reply,
+          agent: data.agent,
+          grounded: data.grounded,
+          groundedCompany: data.groundedCompany,
+        },
+      ]);
       const isNewSession = !sessionId;
       setSessionId(data.sessionId);
       if (isNewSession) {
@@ -345,6 +381,18 @@ const AgentChat = () => {
                         : 'bg-gray-800 text-gray-200 rounded-bl-sm'
                     }`}
                   >
+                    {/* Agent badge */}
+                    {msg.role === 'assistant' && msg.agent && (
+                      <div className="mb-2 text-xs text-purple-300">
+                        🤖 {AGENT_LABELS[msg.agent] || msg.agent}
+                        {msg.grounded && msg.groundedCompany && (
+                          <span className="ml-2 text-green-400">
+                            📊 Based on real {msg.groundedCompany} interview data
+                          </span>
+                        )}
+                      </div>
+                    )}
+
                     {msg.role === 'assistant' ? (
                       <span dangerouslySetInnerHTML={{ __html: formatMessage(msg.content) }} />
                     ) : (
